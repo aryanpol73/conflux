@@ -1,0 +1,372 @@
+{
+  "integrity": {
+    "columns_match_schema": true,
+    "columns": [
+      "amount",
+      "auth_outcome",
+      "bin",
+      "campaign_id",
+      "card_fingerprint",
+      "device_fingerprint",
+      "ip_signature",
+      "label",
+      "merchant_id",
+      "timestamp",
+      "transaction_id"
+    ],
+    "duplicate_transaction_ids": 0,
+    "fully_duplicate_rows": 0,
+    "null_counts": {
+      "transaction_id": 0,
+      "label": 0,
+      "campaign_id": 29832,
+      "timestamp": 0,
+      "merchant_id": 0,
+      "card_fingerprint": 0,
+      "bin": 0,
+      "amount": 0,
+      "device_fingerprint": 0,
+      "ip_signature": 0,
+      "auth_outcome": 0
+    },
+    "label_values": [
+      0,
+      1
+    ],
+    "auth_outcome_values": [
+      "approved",
+      "declined"
+    ],
+    "negative_or_zero_amounts": 0,
+    "campaign_id_present_iff_label_1": true,
+    "bin_all_6digit_numeric": true,
+    "transaction_id_all_uuid4_len36": true
+  },
+  "campaign_variation_by_archetype": {
+    "attack:fast_burst": {
+      "size": 49.12,
+      "merchants": 49.12,
+      "devices": 13.88,
+      "ips": 14.25,
+      "bins": 1.62,
+      "decline_rate": 0.76,
+      "duration_sec": 25.17,
+      "amount_median": 135.08
+    },
+    "attack:longer_duration": {
+      "size": 45.43,
+      "merchants": 45.43,
+      "devices": 13.43,
+      "ips": 25.43,
+      "bins": 1.43,
+      "decline_rate": 0.43,
+      "duration_sec": 926.63,
+      "amount_median": 439.36
+    },
+    "attack:low_amount_skew": {
+      "size": 38.0,
+      "merchants": 38.0,
+      "devices": 13.57,
+      "ips": 11.86,
+      "bins": 1.71,
+      "decline_rate": 0.71,
+      "duration_sec": 49.38,
+      "amount_median": 47.81
+    },
+    "attack:mixed_approval": {
+      "size": 46.29,
+      "merchants": 46.29,
+      "devices": 27.0,
+      "ips": 24.29,
+      "bins": 1.43,
+      "decline_rate": 0.28,
+      "duration_sec": 40.99,
+      "amount_median": 283.42
+    },
+    "attack:multi_bin": {
+      "size": 50.88,
+      "merchants": 50.88,
+      "devices": 18.0,
+      "ips": 14.75,
+      "bins": 3.88,
+      "decline_rate": 0.52,
+      "duration_sec": 51.69,
+      "amount_median": 158.25
+    },
+    "attack:rotating_device": {
+      "size": 41.62,
+      "merchants": 41.62,
+      "devices": 20.25,
+      "ips": 19.12,
+      "bins": 1.62,
+      "decline_rate": 0.56,
+      "duration_sec": 104.74,
+      "amount_median": 157.59
+    }
+  },
+  "hard_negative_clusters": {
+    "hard_negative_office_network": {
+      "row_count": 1065,
+      "all_labeled_normal": true,
+      "unique_devices_reused": 0,
+      "unique_ips_reused": 60,
+      "unique_cards_reused": 0
+    },
+    "hard_negative_flash_sale": {
+      "row_count": 817,
+      "all_labeled_normal": true,
+      "unique_devices_reused": 0,
+      "unique_ips_reused": 0,
+      "unique_cards_reused": 0
+    },
+    "shared_device_legit": {
+      "row_count": 1950,
+      "all_labeled_normal": true,
+      "unique_devices_reused": 350,
+      "unique_ips_reused": 382,
+      "unique_cards_reused": 585
+    }
+  },
+  "identifier_overlap": {
+    "shared_devices": 161,
+    "shared_cards": 219,
+    "shared_ips": 142
+  },
+  "single_feature_stump_5fold_cv": {
+    "merchant_id": {
+      "test_accuracy": 0.936,
+      "test_balanced_accuracy": 0.5,
+      "test_precision": 0.0,
+      "test_recall": 0.0,
+      "test_f1": 0.0
+    },
+    "bin": {
+      "test_accuracy": 0.936,
+      "test_balanced_accuracy": 0.5,
+      "test_precision": 0.0,
+      "test_recall": 0.0,
+      "test_f1": 0.0
+    },
+    "auth_outcome": {
+      "test_accuracy": 0.936,
+      "test_balanced_accuracy": 0.5,
+      "test_precision": 0.0,
+      "test_recall": 0.0,
+      "test_f1": 0.0
+    },
+    "amount": {
+      "test_accuracy": 0.936,
+      "test_balanced_accuracy": 0.5,
+      "test_precision": 0.0,
+      "test_recall": 0.0,
+      "test_f1": 0.0
+    },
+    "card_fingerprint_reuse_count": {
+      "test_accuracy": 0.936,
+      "test_balanced_accuracy": 0.5,
+      "test_precision": 0.0,
+      "test_recall": 0.0,
+      "test_f1": 0.0
+    },
+    "device_fingerprint_reuse_count": {
+      "test_accuracy": 0.936,
+      "test_balanced_accuracy": 0.5,
+      "test_precision": 0.0,
+      "test_recall": 0.0,
+      "test_f1": 0.0
+    },
+    "ip_signature_reuse_count": {
+      "test_accuracy": 0.936,
+      "test_balanced_accuracy": 0.5,
+      "test_precision": 0.0,
+      "test_recall": 0.0,
+      "test_f1": 0.0
+    }
+  },
+  "baseline_majority_class_accuracy": 0.936,
+  "baseline_majority_class_balanced_accuracy": 0.5,
+  "baseline_majority_class_recall": 0.0,
+  "single_feature_auc_cv_stump_proba": {
+    "merchant_id": {
+      "auc": 0.4953,
+      "best_f1": 0.1204,
+      "precision_at_best_f1": 0.064,
+      "recall_at_best_f1": 1.0
+    },
+    "bin": {
+      "auc": 0.3831,
+      "best_f1": 0.1204,
+      "precision_at_best_f1": 0.064,
+      "recall_at_best_f1": 1.0
+    },
+    "auth_outcome": {
+      "auc": 0.7039,
+      "best_f1": 0.3832,
+      "precision_at_best_f1": 0.2982,
+      "recall_at_best_f1": 0.536
+    },
+    "amount": {
+      "auc": 0.6094,
+      "best_f1": 0.1586,
+      "precision_at_best_f1": 0.0906,
+      "recall_at_best_f1": 0.636
+    },
+    "card_fingerprint_reuse_count": {
+      "auc": 0.5448,
+      "best_f1": 0.1316,
+      "precision_at_best_f1": 0.0706,
+      "recall_at_best_f1": 0.974
+    },
+    "device_fingerprint_reuse_count": {
+      "auc": 0.571,
+      "best_f1": 0.2088,
+      "precision_at_best_f1": 0.1396,
+      "recall_at_best_f1": 0.414
+    },
+    "ip_signature_reuse_count": {
+      "auc": 0.4929,
+      "best_f1": 0.1204,
+      "precision_at_best_f1": 0.064,
+      "recall_at_best_f1": 1.0
+    }
+  },
+  "single_feature_auc_raw_value_no_model": {
+    "merchant_id": 0.5028,
+    "bin": 0.519,
+    "auth_outcome": 0.7248,
+    "amount": 0.6302,
+    "card_fingerprint_reuse_count": 0.5287,
+    "device_fingerprint_reuse_count": 0.6394,
+    "ip_signature_reuse_count": 0.5063
+  },
+  "order_and_timestamp_leakage": {
+    "row_position_stump": {
+      "test_accuracy": 0.7978,
+      "test_balanced_accuracy": 0.5193,
+      "test_precision": 0.0156,
+      "test_recall": 0.2,
+      "test_f1": 0.029
+    },
+    "timestamp_stump": {
+      "test_accuracy": 0.7986,
+      "test_balanced_accuracy": 0.5198,
+      "test_precision": 0.0157,
+      "test_recall": 0.2,
+      "test_f1": 0.0291
+    },
+    "transaction_id_non_uuid_count": 0
+  },
+  "temporal_overlap": {
+    "hours_with_attack_traffic": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      15,
+      16,
+      17,
+      18,
+      20,
+      21,
+      22,
+      23
+    ],
+    "hours_with_only_attack_no_normal": [],
+    "total_hours_with_attack": 22
+  },
+  "campaigns_with_lt_2_merchants": 0,
+  "campaign_count": 45,
+  "campaign_size_summary": {
+    "min": 20,
+    "max": 85,
+    "mean": 45.36
+  },
+  "merchants_per_campaign_summary": {
+    "min": 20,
+    "max": 85,
+    "mean": 45.36
+  },
+  "population_reuse_stats_by_label": {
+    "card_reuse": {
+      "0": {
+        "mean": 2.16,
+        "median": 2.0,
+        "max": 8
+      },
+      "1": {
+        "mean": 1.96,
+        "median": 2.0,
+        "max": 7
+      }
+    },
+    "device_reuse": {
+      "0": {
+        "mean": 3.06,
+        "median": 3.0,
+        "max": 9
+      },
+      "1": {
+        "mean": 3.98,
+        "median": 4.0,
+        "max": 8
+      }
+    },
+    "network_reuse": {
+      "0": {
+        "mean": 4.41,
+        "median": 4.0,
+        "max": 25
+      },
+      "1": {
+        "mean": 4.15,
+        "median": 3.0,
+        "max": 10
+      }
+    },
+    "bin_reuse": {
+      "0": {
+        "mean": 128.43,
+        "median": 124.0,
+        "max": 208
+      },
+      "1": {
+        "mean": 155.85,
+        "median": 154.0,
+        "max": 208
+      }
+    }
+  },
+  "amount_overlap": {
+    "normal_5th_95th_pctile": [
+      33.04,
+      2193.44
+    ],
+    "pct_attack_amounts_within_normal_5_95_range": 0.9064,
+    "normal_median": 258.48,
+    "attack_median": 172.53
+  },
+  "auth_outcome_decline_rate_by_label": {
+    "normal": 0.0863,
+    "attack": 0.536,
+    "attack_decline_rate_range_across_campaigns": [
+      0.18,
+      0.96
+    ]
+  },
+  "campaign_id_only_on_attack_rows": true,
+  "flags": [],
+  "attack_prevalence_pct": 6.4,
+  "total_rows": 31873,
+  "merchants_used": 400,
+  "PASSED": true
+}
