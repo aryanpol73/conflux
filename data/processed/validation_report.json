@@ -1,0 +1,671 @@
+{
+  "status": "PASSED",
+  "config_resolved": {
+    "windows_s": [
+      30,
+      120,
+      300,
+      1200
+    ],
+    "group_windows_s": {},
+    "min_history": 3,
+    "min_prior_for_ratio": 2,
+    "min_distinct_for_entropy": 2,
+    "low_value_amount": 5.0,
+    "related_entity_min_merchants": 2,
+    "emit_rate_per_min": false,
+    "auth_approved_tokens": [
+      "approved"
+    ],
+    "auth_declined_tokens": [
+      "declined"
+    ],
+    "eps": 1e-12,
+    "fillna": null,
+    "expected_rows": 31873,
+    "schema_overrides": {},
+    "causality_prefix_fraction": 0.5,
+    "causality_atol": 0.0001,
+    "causality_rtol": 1e-05,
+    "auc_flag_threshold": 0.75,
+    "auc_min_support": 200,
+    "missingness_auc_flag": 0.65,
+    "range_tolerance": 1e-09
+  },
+  "dataset": {
+    "input_rows": 31873,
+    "input_columns": [
+      "transaction_id",
+      "label",
+      "campaign_id",
+      "timestamp",
+      "merchant_id",
+      "card_fingerprint",
+      "bin",
+      "amount",
+      "device_fingerprint",
+      "ip_signature",
+      "auth_outcome"
+    ],
+    "timestamp_span": {
+      "min": "2026-08-26 00:00:01.908089",
+      "max": "2026-08-27 00:47:51.825940"
+    },
+    "distinct_timestamps": 31873,
+    "rows_sharing_a_timestamp": 0,
+    "declined_rows": 3669
+  },
+  "schema_resolved": {
+    "row_id": "transaction_id",
+    "timestamp": "timestamp",
+    "amount": "amount",
+    "card": "card_fingerprint",
+    "device": "device_fingerprint",
+    "ip": "ip_signature",
+    "bin": "bin",
+    "merchant": "merchant_id",
+    "auth": "auth_outcome"
+  },
+  "aggregate_cache_hits": 40,
+  "row_alignment": {
+    "input_rows": 31873,
+    "output_rows": 31873,
+    "transaction_id_sequence_matches_input": true,
+    "row_order": "input CSV order (restored after causal-order computation)"
+  },
+  "forbidden_columns_present": [],
+  "feature_count_total": 156,
+  "feature_count_by_group": {
+    "amount": 52,
+    "bin": 20,
+    "decline": 16,
+    "device": 5,
+    "merchant": 48,
+    "velocity": 15
+  },
+  "nan_cells_total": 2966474,
+  "inf_cells_total": 0,
+  "nan_policy": "NaN means 'undefined given the causal window', e.g. insufficient prior history. It is NOT imputed here; cfg.fillna is available and imputation is the model layer's decision.",
+  "range_violations": [],
+  "spec_coverage": {
+    "locked_items": 32,
+    "covered_by": {
+      "AMOUNT.historical_deviation_card": [
+        "amt_card_dev_1200s",
+        "amt_card_dev_120s",
+        "amt_card_dev_300s",
+        "amt_card_dev_30s",
+        "amt_card_z_1200s",
+        "amt_card_z_120s",
+        "amt_card_z_300s",
+        "amt_card_z_30s"
+      ],
+      "AMOUNT.historical_deviation_device": [
+        "amt_device_dev_1200s",
+        "amt_device_dev_120s",
+        "amt_device_dev_300s",
+        "amt_device_dev_30s",
+        "amt_device_z_1200s",
+        "amt_device_z_120s",
+        "amt_device_z_300s",
+        "amt_device_z_30s"
+      ],
+      "AMOUNT.low_value_ratio": [
+        "amt_card_low_value_ratio_1200s",
+        "amt_card_low_value_ratio_120s",
+        "amt_card_low_value_ratio_300s",
+        "amt_card_low_value_ratio_30s"
+      ],
+      "AMOUNT.similarity_cv": [
+        "amt_card_cv_1200s",
+        "amt_card_cv_120s",
+        "amt_card_cv_300s",
+        "amt_card_cv_30s",
+        "amt_device_cv_1200s",
+        "amt_device_cv_120s",
+        "amt_device_cv_300s",
+        "amt_device_cv_30s"
+      ],
+      "AMOUNT.window_mean": [
+        "amt_card_mean_1200s",
+        "amt_card_mean_120s",
+        "amt_card_mean_300s",
+        "amt_card_mean_30s",
+        "amt_device_mean_1200s",
+        "amt_device_mean_120s",
+        "amt_device_mean_300s",
+        "amt_device_mean_30s"
+      ],
+      "AMOUNT.window_median": [
+        "amt_card_median_1200s",
+        "amt_card_median_120s",
+        "amt_card_median_300s",
+        "amt_card_median_30s",
+        "amt_device_median_1200s",
+        "amt_device_median_120s",
+        "amt_device_median_300s",
+        "amt_device_median_30s"
+      ],
+      "AMOUNT.window_std": [
+        "amt_card_std_1200s",
+        "amt_card_std_120s",
+        "amt_card_std_300s",
+        "amt_card_std_30s",
+        "amt_device_std_1200s",
+        "amt_device_std_120s",
+        "amt_device_std_300s",
+        "amt_device_std_30s"
+      ],
+      "BIN.activity": [
+        "bin_txn_count_1200s",
+        "bin_txn_count_120s",
+        "bin_txn_count_300s",
+        "bin_txn_count_30s"
+      ],
+      "BIN.distinct_cards": [
+        "bin_distinct_cards_1200s",
+        "bin_distinct_cards_120s",
+        "bin_distinct_cards_300s",
+        "bin_distinct_cards_30s"
+      ],
+      "BIN.distinct_merchants": [
+        "bin_distinct_merchants_1200s",
+        "bin_distinct_merchants_120s",
+        "bin_distinct_merchants_300s",
+        "bin_distinct_merchants_30s"
+      ],
+      "BIN.overlap_device": [
+        "dev_distinct_bins_1200s",
+        "dev_distinct_bins_120s",
+        "dev_distinct_bins_300s",
+        "dev_distinct_bins_30s"
+      ],
+      "BIN.overlap_ip": [
+        "ip_distinct_bins_1200s",
+        "ip_distinct_bins_120s",
+        "ip_distinct_bins_300s",
+        "ip_distinct_bins_30s"
+      ],
+      "CONTEXT.merchant_window_txn_count": [
+        "mer_txn_count_1200s",
+        "mer_txn_count_120s",
+        "mer_txn_count_300s",
+        "mer_txn_count_30s"
+      ],
+      "DECLINE.rate_card": [
+        "dec_card_rate_1200s",
+        "dec_card_rate_120s",
+        "dec_card_rate_300s",
+        "dec_card_rate_30s"
+      ],
+      "DECLINE.rate_device": [
+        "dec_device_rate_1200s",
+        "dec_device_rate_120s",
+        "dec_device_rate_300s",
+        "dec_device_rate_30s"
+      ],
+      "DECLINE.rate_ip": [
+        "dec_ip_rate_1200s",
+        "dec_ip_rate_120s",
+        "dec_ip_rate_300s",
+        "dec_ip_rate_30s"
+      ],
+      "DECLINE.rate_merchant": [
+        "dec_merchant_rate_1200s",
+        "dec_merchant_rate_120s",
+        "dec_merchant_rate_300s",
+        "dec_merchant_rate_30s"
+      ],
+      "DEVICE.distinct_cards": [
+        "dev_distinct_cards_1200s",
+        "dev_distinct_cards_120s",
+        "dev_distinct_cards_300s",
+        "dev_distinct_cards_30s"
+      ],
+      "DEVICE.distinct_merchants": [
+        "device_distinct_merchants_1200s",
+        "device_distinct_merchants_120s",
+        "device_distinct_merchants_300s",
+        "device_distinct_merchants_30s"
+      ],
+      "DEVICE.reuse": [
+        "dev_reuse_prior_total"
+      ],
+      "DEVICE.txn_count": [
+        "vel_device_count_1200s",
+        "vel_device_count_120s",
+        "vel_device_count_300s",
+        "vel_device_count_30s"
+      ],
+      "DEVICE.velocity": [
+        "vel_device_count_1200s",
+        "vel_device_count_120s",
+        "vel_device_count_300s",
+        "vel_device_count_30s"
+      ],
+      "MERCHANT.cross_merchant_spread": [
+        "card_merchant_spread_1200s",
+        "card_merchant_spread_120s",
+        "card_merchant_spread_300s",
+        "card_merchant_spread_30s",
+        "device_merchant_spread_1200s",
+        "device_merchant_spread_120s",
+        "device_merchant_spread_300s",
+        "device_merchant_spread_30s",
+        "ip_merchant_spread_1200s",
+        "ip_merchant_spread_120s",
+        "ip_merchant_spread_300s",
+        "ip_merchant_spread_30s"
+      ],
+      "MERCHANT.dispersion_entropy": [
+        "card_merchant_entropy_1200s",
+        "card_merchant_entropy_120s",
+        "card_merchant_entropy_300s",
+        "card_merchant_entropy_30s",
+        "device_merchant_entropy_1200s",
+        "device_merchant_entropy_120s",
+        "device_merchant_entropy_300s",
+        "device_merchant_entropy_30s",
+        "ip_merchant_entropy_1200s",
+        "ip_merchant_entropy_120s",
+        "ip_merchant_entropy_300s",
+        "ip_merchant_entropy_30s"
+      ],
+      "MERCHANT.distinct_merchants_card": [
+        "card_distinct_merchants_1200s",
+        "card_distinct_merchants_120s",
+        "card_distinct_merchants_300s",
+        "card_distinct_merchants_30s"
+      ],
+      "MERCHANT.distinct_merchants_device": [
+        "device_distinct_merchants_1200s",
+        "device_distinct_merchants_120s",
+        "device_distinct_merchants_300s",
+        "device_distinct_merchants_30s"
+      ],
+      "MERCHANT.distinct_merchants_ip": [
+        "ip_distinct_merchants_1200s",
+        "ip_distinct_merchants_120s",
+        "ip_distinct_merchants_300s",
+        "ip_distinct_merchants_30s"
+      ],
+      "MERCHANT.related_entities": [
+        "merchant_related_devices_1200s",
+        "merchant_related_devices_120s",
+        "merchant_related_devices_300s",
+        "merchant_related_devices_30s",
+        "merchant_related_ips_1200s",
+        "merchant_related_ips_120s",
+        "merchant_related_ips_300s",
+        "merchant_related_ips_30s"
+      ],
+      "VELOCITY.burst_density": [
+        "vel_card_burst_density_30s_1200s",
+        "vel_device_burst_density_30s_1200s",
+        "vel_ip_burst_density_30s_1200s"
+      ],
+      "VELOCITY.rolling_count_card": [
+        "vel_card_count_1200s",
+        "vel_card_count_120s",
+        "vel_card_count_300s",
+        "vel_card_count_30s"
+      ],
+      "VELOCITY.rolling_count_device": [
+        "vel_device_count_1200s",
+        "vel_device_count_120s",
+        "vel_device_count_300s",
+        "vel_device_count_30s"
+      ],
+      "VELOCITY.rolling_count_ip": [
+        "vel_ip_count_1200s",
+        "vel_ip_count_120s",
+        "vel_ip_count_300s",
+        "vel_ip_count_30s"
+      ]
+    },
+    "uncovered_locked_items": [],
+    "conditional_items": {
+      "VELOCITY.txns_per_minute": false
+    },
+    "conditional_rationale": {
+      "VELOCITY.txns_per_minute": "transactions-per-minute is count * 60 / W, an exact deterministic rescaling of vel_{entity}_count_{w}s which is already emitted. Emitting both would be the same quantity under two names (perfectly collinear for the Logistic Regression baseline). Set features.emit_rate_per_min=true in configuration to emit it."
+    },
+    "documented_deviations": {
+      "CONTEXT.merchant_window_txn_count": "mer_txn_count_{w}s is merchant-side window volume. It is not itself a locked Merchant Pattern item; it is emitted because MERCHANT.related_entities is a raw count of related devices/IPs at the current merchant and is uninterpretable without the merchant's own window volume as scale. Not a dispersion measure and deliberately NOT merchant->card entropy (that direction was the audited error)."
+    },
+    "passed": true
+  },
+  "causality_prefix_test": {
+    "executed": true,
+    "method": "features recomputed on the first 50% of time-sorted rows and compared to the full-dataset run for every feature and every overlapping transaction_id",
+    "prefix_rows": 15937,
+    "full_rows": 31873,
+    "columns_compared": 156,
+    "tolerance": {
+      "atol": 0.0001,
+      "rtol": 1e-05
+    },
+    "max_abs_diff_observed": 2.4666100898684817e-05,
+    "columns_with_mismatches": 0,
+    "mismatch_detail": [],
+    "passed": true
+  },
+  "audit": {
+    "note": "ROC-AUC is an audit metric only (DECISIONS.md). Features above the threshold require investigation for synthetic artifact, missingness artifact, temporal leakage or actual leakage before being trusted.",
+    "auc_flag_threshold": 0.75,
+    "features_flagged_for_investigation": [
+      {
+        "feature": "bin_distinct_merchants_120s",
+        "auc_directed": 0.9698273995981285,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "bin_txn_count_120s",
+        "auc_directed": 0.9698201895337063,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "bin_distinct_cards_120s",
+        "auc_directed": 0.9696197283917818,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "bin_distinct_merchants_300s",
+        "auc_directed": 0.9693806465972635,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "bin_txn_count_300s",
+        "auc_directed": 0.9693727138840154,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "bin_distinct_cards_300s",
+        "auc_directed": 0.968962298622408,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "dec_ip_rate_1200s",
+        "auc_directed": 0.9594835366612723,
+        "n_scored": 1295,
+        "missing_rate": 0.9593699996862548
+      },
+      {
+        "feature": "bin_distinct_merchants_1200s",
+        "auc_directed": 0.9547457514490094,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "bin_txn_count_1200s",
+        "auc_directed": 0.9546964470904779,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "dec_ip_rate_300s",
+        "auc_directed": 0.9546159587619247,
+        "n_scored": 647,
+        "missing_rate": 0.9797006871019358
+      },
+      {
+        "feature": "bin_distinct_cards_1200s",
+        "auc_directed": 0.9526729071991459,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "bin_txn_count_30s",
+        "auc_directed": 0.9526635866716753,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "bin_distinct_merchants_30s",
+        "auc_directed": 0.9526635538240014,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "bin_distinct_cards_30s",
+        "auc_directed": 0.9525778624547014,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "dec_ip_rate_120s",
+        "auc_directed": 0.9462188645373626,
+        "n_scored": 490,
+        "missing_rate": 0.9846264863677721
+      },
+      {
+        "feature": "vel_ip_burst_density_30s_1200s",
+        "auc_directed": 0.8889961090654889,
+        "n_scored": 3302,
+        "missing_rate": 0.896401342829354
+      },
+      {
+        "feature": "dec_ip_rate_30s",
+        "auc_directed": 0.8756983240223464,
+        "n_scored": 360,
+        "missing_rate": 0.988705173657955
+      },
+      {
+        "feature": "vel_device_burst_density_30s_1200s",
+        "auc_directed": 0.8694455627711942,
+        "n_scored": 2073,
+        "missing_rate": 0.9349606249803909
+      },
+      {
+        "feature": "vel_card_burst_density_30s_1200s",
+        "auc_directed": 0.84240936568581,
+        "n_scored": 1118,
+        "missing_rate": 0.964923289304427
+      },
+      {
+        "feature": "amt_device_median_30s",
+        "auc_directed": 0.8311778405430851,
+        "n_scored": 982,
+        "missing_rate": 0.9691902237003106
+      },
+      {
+        "feature": "amt_device_mean_30s",
+        "auc_directed": 0.8240919676923839,
+        "n_scored": 982,
+        "missing_rate": 0.9691902237003106
+      },
+      {
+        "feature": "device_distinct_merchants_1200s",
+        "auc_directed": 0.7977956484452736,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "vel_device_count_1200s",
+        "auc_directed": 0.7977890296389817,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "dev_distinct_cards_1200s",
+        "auc_directed": 0.7977324002491694,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "dev_distinct_bins_1200s",
+        "auc_directed": 0.7954084437442196,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "device_distinct_merchants_300s",
+        "auc_directed": 0.7951613635411053,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "vel_device_count_300s",
+        "auc_directed": 0.7951613635411053,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "dev_distinct_cards_300s",
+        "auc_directed": 0.7951430509629033,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "dev_distinct_bins_300s",
+        "auc_directed": 0.7946174799685031,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "ip_merchant_spread_1200s",
+        "auc_directed": 0.7866876310272537,
+        "n_scored": 1704,
+        "missing_rate": 0.946537821980987
+      },
+      {
+        "feature": "ip_merchant_entropy_1200s",
+        "auc_directed": 0.7851108764519535,
+        "n_scored": 1697,
+        "missing_rate": 0.9467574436043046
+      },
+      {
+        "feature": "device_distinct_merchants_120s",
+        "auc_directed": 0.7740840787455973,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "vel_device_count_120s",
+        "auc_directed": 0.7740840787455973,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "dev_distinct_cards_120s",
+        "auc_directed": 0.7740768522573381,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "dev_distinct_bins_120s",
+        "auc_directed": 0.7739012485926414,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "amt_card_median_30s",
+        "auc_directed": 0.773109243697479,
+        "n_scored": 482,
+        "missing_rate": 0.9848774825087064
+      },
+      {
+        "feature": "amt_card_mean_30s",
+        "auc_directed": 0.7717086834733894,
+        "n_scored": 482,
+        "missing_rate": 0.9848774825087064
+      },
+      {
+        "feature": "ip_distinct_merchants_300s",
+        "auc_directed": 0.7715066695887958,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "vel_ip_count_300s",
+        "auc_directed": 0.7712090696632155,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "ip_distinct_bins_300s",
+        "auc_directed": 0.7676509767781399,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "ip_distinct_merchants_120s",
+        "auc_directed": 0.767621479566973,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "vel_ip_count_120s",
+        "auc_directed": 0.7675460120361761,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "ip_distinct_merchants_1200s",
+        "auc_directed": 0.767363231154731,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "vel_ip_count_1200s",
+        "auc_directed": 0.7664925707102022,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "ip_distinct_bins_120s",
+        "auc_directed": 0.7658771038442421,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      },
+      {
+        "feature": "ip_distinct_bins_1200s",
+        "auc_directed": 0.761683621978983,
+        "n_scored": 31873,
+        "missing_rate": 0.0
+      }
+    ],
+    "features_with_missingness_signal": [
+      "vel_ip_burst_density_30s_1200s",
+      "vel_device_burst_density_30s_1200s",
+      "vel_card_burst_density_30s_1200s",
+      "amt_device_median_30s",
+      "amt_device_mean_30s",
+      "ip_merchant_spread_1200s",
+      "ip_merchant_entropy_1200s",
+      "amt_device_median_120s",
+      "amt_device_mean_120s",
+      "amt_card_median_300s",
+      "amt_card_mean_300s",
+      "amt_device_median_300s",
+      "amt_card_median_1200s",
+      "amt_card_mean_1200s",
+      "amt_device_mean_300s",
+      "amt_device_median_1200s",
+      "amt_device_mean_1200s",
+      "amt_device_dev_30s",
+      "ip_merchant_spread_300s",
+      "ip_merchant_spread_120s",
+      "ip_merchant_entropy_300s",
+      "ip_merchant_entropy_120s",
+      "amt_device_dev_120s",
+      "device_merchant_spread_1200s",
+      "amt_card_dev_1200s",
+      "amt_device_dev_300s",
+      "amt_device_dev_1200s",
+      "amt_card_dev_300s",
+      "device_merchant_entropy_1200s",
+      "device_merchant_spread_120s",
+      "device_merchant_entropy_120s",
+      "device_merchant_spread_300s",
+      "device_merchant_entropy_300s"
+    ]
+  },
+  "failures": []
+}
