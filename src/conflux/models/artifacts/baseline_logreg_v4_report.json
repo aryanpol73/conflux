@@ -1,0 +1,269 @@
+{
+  "status": "OK",
+  "artifact": "C:\\Users\\Aryan\\OneDrive\\Desktop\\MyWork\\Projects - Part2\\conflux\\src\\conflux\\models\\artifacts\\baseline_model.pkl",
+  "dataset": {
+    "features_path": "C:\\Users\\Aryan\\OneDrive\\Desktop\\MyWork\\Projects - Part2\\conflux\\data\\processed\\features_v4.csv",
+    "dataset_path": "C:\\Users\\Aryan\\OneDrive\\Desktop\\MyWork\\Projects - Part2\\conflux\\data\\raw\\dataset_v4_final.csv",
+    "rows": 31873,
+    "rows_expected": 31873,
+    "rows_match_expected": true,
+    "feature_count": 156,
+    "duplicate_transaction_ids": 0,
+    "missing_targets": 0,
+    "id_sets_identical": true,
+    "positives_total": 2041,
+    "negatives_total": 29832,
+    "prevalence_total": 0.06403539045587174,
+    "timestamp_min": "2026-08-26 00:00:01.908089",
+    "timestamp_max": "2026-08-27 00:47:51.825940",
+    "distinct_timestamps": 31873
+  },
+  "split": {
+    "method": "chronological cutoff on timestamp (no shuffling, no random_state)",
+    "requested_fractions": {
+      "train": 0.7,
+      "val": 0.15,
+      "test": 0.15
+    },
+    "cutoff_train_end_exclusive": "2026-08-26 16:45:36.886117",
+    "cutoff_val_end_exclusive": "2026-08-26 20:31:58.265070",
+    "splits": [
+      {
+        "split": "train",
+        "rows": 22311,
+        "positives": 1358,
+        "negatives": 20953,
+        "prevalence": 0.06086683698623997,
+        "ts_start": "2026-08-26 00:00:01.908089",
+        "ts_end": "2026-08-26 16:45:35.451126"
+      },
+      {
+        "split": "val",
+        "rows": 4781,
+        "positives": 142,
+        "negatives": 4639,
+        "prevalence": 0.029700899393432335,
+        "ts_start": "2026-08-26 16:45:36.886117",
+        "ts_end": "2026-08-26 20:31:56.736448"
+      },
+      {
+        "split": "test",
+        "rows": 4781,
+        "positives": 541,
+        "negatives": 4240,
+        "prevalence": 0.11315624346371052,
+        "ts_start": "2026-08-26 20:31:58.265070",
+        "ts_end": "2026-08-27 00:47:51.825940"
+      }
+    ]
+  },
+  "preprocessing_fit_evidence": {
+    "train_rows": 22311,
+    "imputer_n_features_in": 156,
+    "scaler_n_samples_seen": 22311,
+    "scaler_saw_only_train": true,
+    "indicator_columns": 95,
+    "matrix_width_after_impute": 251
+  },
+  "convergence": {
+    "converged": true,
+    "n_iter": 77,
+    "final_max_iter": 1000,
+    "attempts": [
+      {
+        "max_iter": 1000,
+        "n_iter": 77,
+        "converged": true
+      }
+    ]
+  },
+  "metrics": {
+    "operating_threshold": 0.9340704452789963,
+    "threshold_selection": "max F1 on VALIDATION only; test never used for tuning",
+    "train": {
+      "n": 22311,
+      "positives": 1358,
+      "prevalence": 0.06086683698623997,
+      "threshold": 0.9340704452789963,
+      "prob_min": 9.54802974856769e-22,
+      "prob_max": 1.0,
+      "prob_mean": 0.10989154569900102,
+      "roc_auc": 0.9902947279369276,
+      "pr_auc": 0.9624794314922099,
+      "brier": 0.01454065595363284,
+      "tp": 1234,
+      "fp": 27,
+      "fn": 124,
+      "tn": 20926,
+      "precision": 0.9785884218873909,
+      "recall": 0.9086892488954345,
+      "f1": 0.942344406261932,
+      "alert_rate": 0.05651920577293711,
+      "recall_at_top_1pct": 0.1642120765832106,
+      "recall_at_top_5pct": 0.8159057437407953
+    },
+    "validation": {
+      "n": 4781,
+      "positives": 142,
+      "prevalence": 0.029700899393432335,
+      "threshold": 0.9340704452789963,
+      "prob_min": 7.208458974829424e-17,
+      "prob_max": 1.0,
+      "prob_mean": 0.05380288384346225,
+      "roc_auc": 0.9938814824710279,
+      "pr_auc": 0.97081912001735,
+      "brier": 0.00603775817401725,
+      "tp": 133,
+      "fp": 2,
+      "fn": 9,
+      "tn": 4637,
+      "precision": 0.9851851851851852,
+      "recall": 0.9366197183098591,
+      "f1": 0.9602888086642599,
+      "alert_rate": 0.02823677055009412,
+      "recall_at_top_1pct": 0.3380281690140845,
+      "recall_at_top_5pct": 0.971830985915493
+    },
+    "test": {
+      "n": 4781,
+      "positives": 541,
+      "prevalence": 0.11315624346371052,
+      "threshold": 0.9340704452789963,
+      "prob_min": 5.6259431427105685e-49,
+      "prob_max": 1.0,
+      "prob_mean": 0.12287096978421591,
+      "roc_auc": 0.9944538415931363,
+      "pr_auc": 0.97837152623489,
+      "brier": 0.010399052654884547,
+      "tp": 470,
+      "fp": 4,
+      "fn": 71,
+      "tn": 4236,
+      "precision": 0.9915611814345991,
+      "recall": 0.8687615526802218,
+      "f1": 0.9261083743842365,
+      "alert_rate": 0.09914243882033047,
+      "recall_at_top_1pct": 0.08872458410351201,
+      "recall_at_top_5pct": 0.4417744916820702
+    }
+  },
+  "reload_check": {
+    "artifact_path": "C:\\Users\\Aryan\\OneDrive\\Desktop\\MyWork\\Projects - Part2\\conflux\\src\\conflux\\models\\artifacts\\baseline_model.pkl",
+    "artifact_bytes": 23817,
+    "schema_version_match": true,
+    "feature_names_match": true,
+    "probabilities_identical": true,
+    "max_abs_diff": 0.0,
+    "all_finite": true,
+    "within_unit_interval": true
+  },
+  "top_abs_coefficients": [
+    [
+      "bin_distinct_cards_30s",
+      2.3090276417029596
+    ],
+    [
+      "dev_reuse_prior_total",
+      -2.1893071948428973
+    ],
+    [
+      "bin_distinct_merchants_30s",
+      1.836489777039618
+    ],
+    [
+      "bin_txn_count_30s",
+      1.8360414069447513
+    ],
+    [
+      "bin_distinct_cards_1200s",
+      1.7417776442364927
+    ],
+    [
+      "ip_distinct_bins_1200s",
+      -1.656559562227669
+    ],
+    [
+      "dev_distinct_bins_1200s",
+      -1.5144488646484286
+    ],
+    [
+      "bin_txn_count_1200s",
+      -1.122921147366941
+    ],
+    [
+      "mer_txn_count_1200s",
+      -0.889545026018233
+    ],
+    [
+      "bin_distinct_cards_120s",
+      0.8470079377705604
+    ],
+    [
+      "__missing__dec_merchant_rate_300s",
+      0.6432176693981534
+    ],
+    [
+      "vel_ip_burst_density_30s_1200s",
+      0.613614864943922
+    ],
+    [
+      "ip_distinct_merchants_300s",
+      0.5729920771119332
+    ],
+    [
+      "vel_ip_count_300s",
+      0.555984672196839
+    ],
+    [
+      "__missing__device_merchant_entropy_1200s",
+      -0.5077848356599248
+    ],
+    [
+      "__missing__device_merchant_spread_1200s",
+      -0.5060708476449873
+    ],
+    [
+      "vel_device_burst_density_30s_1200s",
+      0.4414874958857743
+    ],
+    [
+      "bin_distinct_merchants_300s",
+      0.44114695383412333
+    ],
+    [
+      "dev_distinct_cards_1200s",
+      0.3842227892863633
+    ],
+    [
+      "dec_ip_rate_300s",
+      0.3815714105612882
+    ],
+    [
+      "__missing__ip_merchant_entropy_30s",
+      -0.36880156957489224
+    ],
+    [
+      "__missing__ip_merchant_spread_30s",
+      -0.3657408945182478
+    ],
+    [
+      "merchant_related_ips_300s",
+      -0.3512537653474569
+    ],
+    [
+      "bin_distinct_cards_300s",
+      -0.34695411400307835
+    ],
+    [
+      "merchant_related_devices_300s",
+      -0.34310775621225104
+    ]
+  ],
+  "environment": {
+    "python": "3.14.4",
+    "sklearn": "1.9.0",
+    "numpy": "2.5.0",
+    "pandas": "3.0.5",
+    "joblib": "1.5.3"
+  }
+}
