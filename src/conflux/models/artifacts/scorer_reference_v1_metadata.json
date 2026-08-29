@@ -1,0 +1,86 @@
+{
+  "artifact_file": "scorer_reference_v1.json",
+  "artifact_schema_version": 1,
+  "artifact_size_bytes": 396336,
+  "builder": "tools/build_scorer_reference.py",
+  "feature_bounds": {
+    "burst_rate_per_minute": {
+      "hi": 4.2372845528379335,
+      "lo": 0.016953899917103384
+    },
+    "distinct_bins_per_transaction": {
+      "hi": 1.0,
+      "lo": 0.17362745098039215
+    },
+    "distinct_merchants_per_transaction": {
+      "hi": 1.0,
+      "lo": 0.5
+    },
+    "link_density": {
+      "hi": 1.0,
+      "lo": 0.25801751530651784
+    },
+    "max_transactions_per_shared_card": {
+      "hi": 3.0,
+      "lo": 1.0
+    },
+    "multi_entity_link_fraction": {
+      "hi": 1.0,
+      "lo": 0.0
+    }
+  },
+  "fit_scope": "phase4a_candidate_scoring_features_csv",
+  "ground_truth_used_for_reference_fit": false,
+  "method": "Fitted DeterministicScorer on the six Phase 4A retained features projected from the Phase 4A candidate scoring feature population. Signs inherited by name from the Phase 4A report; weights uniform; no labels, campaign ids, or supervised computation involved.",
+  "min_size": 2,
+  "n_reference": 4372,
+  "phase": "5.5",
+  "phase3b_artifact_sha256": {
+    "campaign_candidate_assignments.csv": "93eef16a1862047d33a061c81036d60551573fd9671d0a9ca4da484e45c3d9bb",
+    "campaign_candidates.csv": "72f59354ac544c53a8c83b75a652adb9592c8a74028b9356ee553644e231efda"
+  },
+  "phase4a_ground_truth_used": false,
+  "phase4a_population_actual": 4372,
+  "phase4a_population_expected": 4372,
+  "reference_representation": "phase4a_candidate_scoring_features_csv",
+  "retained_features": [
+    "burst_rate_per_minute",
+    "link_density",
+    "max_transactions_per_shared_card",
+    "multi_entity_link_fraction",
+    "distinct_merchants_per_transaction",
+    "distinct_bins_per_transaction"
+  ],
+  "score_range_on_reference": [
+    0.2782288807563282,
+    0.7457113449222325
+  ],
+  "sign_source": "feature_design.core_features[].sign (matched by name)",
+  "signs": {
+    "burst_rate_per_minute": 1,
+    "distinct_bins_per_transaction": 1,
+    "distinct_merchants_per_transaction": 1,
+    "link_density": 1,
+    "max_transactions_per_shared_card": 1,
+    "multi_entity_link_fraction": 1
+  },
+  "signs_weights_binding": "mapping",
+  "source_feature_file": "data/processed/scoring/candidate_scoring_features.csv",
+  "source_feature_file_sha256": "8d23941d0034cbeddabe14da64626573f5f8704d7b22747ca47c99fd15a54eb5",
+  "source_phase4a_report": "data/processed/scoring/phase4a_scoring_report.json",
+  "source_phase4a_report_sha256": "83ba7803828a481bfb6676faa49f0cc8bb7fb6544b485eae85a5930ac9d35191",
+  "weight_decision": "adopt_tuned_weights",
+  "weight_finding": "Phase 4A preregistration adopted the tuned-weight branch, but the resulting selected fold weights were uniform (1.0) for all six retained features. Production therefore uses uniform weights.",
+  "weights": {
+    "burst_rate_per_minute": 1.0,
+    "distinct_bins_per_transaction": 1.0,
+    "distinct_merchants_per_transaction": 1.0,
+    "link_density": 1.0,
+    "max_transactions_per_shared_card": 1.0,
+    "multi_entity_link_fraction": 1.0
+  },
+  "winsor": [
+    0.01,
+    0.99
+  ]
+}
