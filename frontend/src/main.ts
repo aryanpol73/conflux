@@ -120,7 +120,7 @@ const story = new StoryController(
     onNotice: (message, severity) => ui.toast(message, severity),
     onFinished: () => ui.toast('Replay complete.', 'info'),
   },
-  { warmupCount: 60, liveIntervalMs: 320, budget: 300 }
+  { warmupCount: 100, liveIntervalMs: 120, budget: 500 }
 );
 
 /* -- behaviour ------------------------------------------------------- */
@@ -169,8 +169,9 @@ function selectCandidate(key: string | null): void {
   graph.focusCandidate(key);
 }
 
-function handleReset(): void {
-  story.reset();
+async function handleReset(): Promise<void> {
+  await story.reset();
+
   latestDetection = null;
   selectedKey = null;
   graph.clear();

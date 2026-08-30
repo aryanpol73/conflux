@@ -37,7 +37,7 @@ export const DEFAULT_REPLAY_URL = '/data/replay-population.json';
  * quadratically across a full replay. This is a safety net; the exporter
  * should already emit something well below it.
  */
-export const MAX_REPLAY_TRANSACTIONS = 600;
+export const MAX_REPLAY_TRANSACTIONS = 500;
 
 export function resolveReplayUrl(): string {
   const override = new URLSearchParams(window.location.search).get('replay');

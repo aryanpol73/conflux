@@ -20,14 +20,13 @@
   --band-high: #ff9257;
   --band-medium: #ffc857;
   --band-low: #57d3a3;
-  --band-unranked: #6a7párt;
   --band-unranked: #6a7488;
 
   --font-ui: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, 'Cascadia Code', monospace;
 
   --radius: 10px;
-  --header-h: 76px;
+  --header-h: 86px;
   --footer-h: 58px;
   --rail-w: 290px;
 }
@@ -112,11 +111,8 @@ body::before {
 #act-description {
   font-size: 12px;
   color: var(--text-dim);
-  margin-top: 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 78ch;
+  margin-top: 3px;
+  line-height: 1.4;
 }
 
 #act-block[data-beat='converge'] #act-label,
@@ -355,6 +351,36 @@ body::before {
 .m-amount { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .m-card { font-family: var(--font-mono); color: var(--text-faint); }
 
+/* ── panel scrollbars ───────────────────────────────────────────── */
+/* Only affects the Candidates and Investigation panels. */
+
+#candidate-list,
+#candidate-detail {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 112, 138, 0.65) transparent;
+}
+
+/* Chrome / Edge / Safari */
+#candidate-list::-webkit-scrollbar,
+#candidate-detail::-webkit-scrollbar {
+  width: 7px;
+}
+
+#candidate-list::-webkit-scrollbar-track,
+#candidate-detail::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#candidate-list::-webkit-scrollbar-thumb,
+#candidate-detail::-webkit-scrollbar-thumb {
+  background: rgba(100, 112, 138, 0.55);
+  border-radius: 999px;
+}
+
+#candidate-list::-webkit-scrollbar-thumb:hover,
+#candidate-detail::-webkit-scrollbar-thumb:hover {
+  background: rgba(154, 166, 187, 0.75);
+}
 /* ── footer ─────────────────────────────────────────────────────── */
 
 #conflux-footer {
