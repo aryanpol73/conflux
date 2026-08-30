@@ -1,0 +1,204 @@
+/* Graph stage: the centrepiece. Link styling encodes provenance —
+   solid = backend output, dashed = derived locally by the frontend. */
+
+#graph-stage {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+}
+
+#graph-container {
+  position: absolute;
+  inset: 0;
+}
+
+.conflux-graph {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+  touch-action: none;
+}
+
+.conflux-graph:active { cursor: grabbing; }
+
+/* ── links ──────────────────────────────────────────────────────── */
+
+.graph-link {
+  stroke-linecap: round;
+  transition: opacity 220ms ease, stroke-width 220ms ease;
+}
+
+.graph-link.backend {
+  stroke: rgba(255, 255, 255, 0.3);
+  stroke-width: 1.5;
+}
+
+.graph-link.derived {
+  stroke-width: 1.1;
+  stroke-dasharray: 3 4;
+  opacity: 0.72;
+}
+
+.graph-link.kind-card { stroke: #7b8cff; }
+.graph-link.kind-device { stroke: #46d5e6; }
+.graph-link.kind-ip { stroke: #b98cff; }
+.graph-link.kind-membership { stroke: rgba(255, 255, 255, 0.34); }
+
+.graph-link.dimmed { opacity: 0.07; }
+
+/* ── nodes ──────────────────────────────────────────────────────── */
+
+.graph-node { cursor: pointer; }
+
+.node-core {
+  fill: #10161f;
+  stroke: rgba(255, 255, 255, 0.4);
+  stroke-width: 1.3;
+  transition: stroke 200ms ease, fill 200ms ease, opacity 220ms ease;
+}
+
+.graph-node.kind-transaction .node-core { fill: #131b26; stroke: rgba(154, 166, 187, 0.55); }
+
+.graph-node.kind-candidate .node-core {
+  fill: rgba(16, 22, 31, 0.95);
+  stroke-width: 2.2;
+}
+
+.graph-node.band-high .node-core { stroke: #ff9257; }
+.graph-node.band-medium .node-core { stroke: #ffc857; }
+.graph-node.band-low .node-core { stroke: #57d3a3; }
+
+.graph-node.kind-transaction.band-high .node-core { fill: rgba(255, 146, 87, 0.2); }
+.graph-node.kind-transaction.band-medium .node-core { fill: rgba(255, 200, 87, 0.16); }
+.graph-node.kind-transaction.band-low .node-core { fill: rgba(87, 211, 163, 0.14); }
+
+.node-halo {
+  fill: url(#cand-glow);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.graph-node.band-high .node-halo { color: #ff9257; }
+.graph-node.band-medium .node-halo { color: #ffc857; }
+.graph-node.band-low .node-halo { color: #57d3a3; }
+
+.node-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  fill: var(--text-dim);
+  letter-spacing: 0.08em;
+  pointer-events: none;
+}
+
+.graph-node.hovered .node-core { stroke: #ffffff; }
+
+.graph-node.selected .node-core {
+  stroke: var(--accent);
+  stroke-width: 2.8;
+  filter: drop-shadow(0 0 9px rgba(70, 213, 230, 0.65));
+}
+
+.graph-node.dimmed { opacity: 0.14; }
+
+/* ── overlays ───────────────────────────────────────────────────── */
+
+#graph-legend {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(6, 8, 13, 0.76);
+  backdrop-filter: blur(9px);
+  font-size: 10.5px;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+
+.legend-row { display: flex; align-items: center; gap: 8px; }
+
+.swatch { width: 15px; height: 2px; border-radius: 2px; flex: none; }
+.swatch.node-tx { width: 8px; height: 8px; border-radius: 50%; background: #131b26; border: 1px solid rgba(154, 166, 187, 0.7); }
+.swatch.node-cand { width: 11px; height: 11px; border-radius: 50%; background: rgba(16, 22, 31, 0.9); border: 2px solid #ff9257; }
+.swatch.line-membership { background: rgba(255, 255, 255, 0.42); }
+.swatch.line-card { background: #7b8cff; }
+.swatch.line-device { background: #46d5e6; }
+.swatch.line-ip { background: #b98cff; }
+
+#graph-modes {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 6px;
+}
+
+#graph-modes button {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: rgba(6, 8, 13, 0.74);
+  backdrop-filter: blur(9px);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+
+#graph-modes button:hover { color: var(--text); border-color: var(--line-strong); }
+#graph-modes button.active { color: var(--accent); border-color: rgba(70, 213, 230, 0.45); }
+
+.stage-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.stage-overlay-inner { text-align: center; }
+.stage-overlay-title { font-size: 15px; color: var(--text-dim); }
+.stage-overlay-body { margin-top: 6px; font-size: 12px; color: var(--text-faint); }
+
+/* ── tooltip ────────────────────────────────────────────────────── */
+
+.graph-tooltip {
+  position: absolute;
+  top: 0; left: 0;
+  z-index: 20;
+  min-width: 160px;
+  max-width: 280px;
+  padding: 9px 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: rgba(6, 8, 13, 0.94);
+  backdrop-filter: blur(11px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+  font-size: 11px;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.tt-title { font-family: var(--font-mono); font-size: 11px; margin-bottom: 5px; }
+.tt-row { color: var(--text-dim); font-size: 10.5px; line-height: 1.55; }
+
+.tt-tag {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.tt-tag.backend { background: rgba(70, 213, 230, 0.15); color: var(--accent); }
+.tt-tag.derived { background: rgba(154, 166, 187, 0.14); color: var(--text-dim); }

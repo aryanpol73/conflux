@@ -75,6 +75,7 @@ class ApiState:
         self._reference: Any | None = None
         self._load_error: str | None = None
         self._rows: list[dict[str, Any]] = []
+        self._transaction_ids: set[str] = set()
         #: Optional pass-through kwargs for run_detection_pipeline (min_size,
         #: thresholds, actions, top_n_signals, ...). Empty by default so the
         #: pipeline's own defaults win.
@@ -158,8 +159,17 @@ class ApiState:
                 + ", ".join(missing)
             )
         stored = {name: record[name] for name in TRANSACTION_COLUMNS}
+        transaction_id = str(stored["transaction_id"])
+
         with self._lock:
+            if transaction_id in self._transaction_ids:
+                raise ValueError(
+                    f"duplicate transaction_id: {transaction_id}"
+                )
+
             self._rows.append(stored)
+            self._transaction_ids.add(transaction_id)
+
         return dict(stored)
 
     def transactions(self) -> list[dict[str, Any]]:
@@ -187,11 +197,13 @@ class ApiState:
     def clear_transactions(self) -> None:
         with self._lock:
             self._rows.clear()
+            self._transaction_ids.clear()
 
     def reset(self) -> None:
-        """Clear transactions *and* the cached scorer reference."""
+        """Clear transactions and reset cached runtime state."""
         with self._lock:
             self._rows.clear()
+            self._transaction_ids.clear()
             self._reference = None
             self._load_error = None
 

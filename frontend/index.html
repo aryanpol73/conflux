@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CONFLUX — Coordinated Structure Console</title>
+  </head>
+
+  <body>
+    <div id="app">
+
+      <!-- Header -->
+      <header id="conflux-header">
+        <div class="brand-block">
+          <div class="brand">CONFLUX</div>
+          <div class="brand-sub">coordinated structure console</div>
+        </div>
+
+        <div id="act-block">
+          <div id="act-label">STANDBY</div>
+
+          <div id="act-title">
+            Awaiting replay
+          </div>
+
+          <div id="act-description">
+            Load the replay population and press START to begin ingestion.
+          </div>
+        </div>
+
+        <div id="status-cluster">
+          <div id="analyzing-indicator" class="hidden">
+            <span class="pulse-dot"></span>
+            <span>analyzing</span>
+          </div>
+
+          <div id="connection-status" data-state="idle">
+            <span id="status-dot"></span>
+            <span id="status-text">IDLE</span>
+          </div>
+        </div>
+      </header>
+
+
+      <!-- Blocking banner -->
+      <div id="blocking-banner" class="hidden">
+        <span id="blocking-banner-text"></span>
+
+        <button
+          id="blocking-banner-dismiss"
+          type="button"
+        >
+          dismiss
+        </button>
+      </div>
+
+
+      <!-- Main -->
+      <main id="conflux-main">
+
+        <!-- Left rail -->
+        <aside id="left-rail">
+
+          <section class="rail-section">
+            <h2 class="rail-title">Population</h2>
+
+            <div id="stat-grid">
+
+              <div class="stat">
+                <span class="stat-value" id="stat-sent">0</span>
+                <span class="stat-label">sent</span>
+              </div>
+
+              <div class="stat">
+                <span class="stat-value" id="stat-remaining">0</span>
+                <span class="stat-label">queued</span>
+              </div>
+
+              <div class="stat">
+                <span class="stat-value" id="stat-candidates">0</span>
+                <span class="stat-label">components</span>
+              </div>
+
+              <div class="stat">
+                <span class="stat-value" id="stat-scored">0</span>
+                <span class="stat-label">scored candidates</span>
+              </div>
+
+            </div>
+
+            <div id="replay-progress">
+              <div id="replay-progress-fill"></div>
+            </div>
+
+            <div id="replay-provenance" class="provenance">
+              replay population not loaded
+            </div>
+          </section>
+
+
+          <section class="rail-section grow">
+            <h2 class="rail-title">Activity</h2>
+
+            <ul id="activity-list"></ul>
+          </section>
+
+        </aside>
+
+
+        <!-- Graph -->
+        <section id="graph-stage">
+
+          <div id="graph-container"></div>
+
+
+          <!-- Graph legend -->
+          <div id="graph-legend">
+
+            <div class="legend-row">
+              <span class="swatch node-tx"></span>
+              transaction
+            </div>
+
+            <div class="legend-row">
+              <span class="swatch node-cand"></span>
+              candidate (backend)
+            </div>
+
+            <div class="legend-row">
+              <span class="swatch line-membership"></span>
+              membership · backend
+            </div>
+
+            <div class="legend-row">
+              <span class="swatch line-card"></span>
+              shared card · derived locally
+            </div>
+
+            <div class="legend-row">
+              <span class="swatch line-device"></span>
+              shared device · derived locally
+            </div>
+
+            <div class="legend-row">
+              <span class="swatch line-ip"></span>
+              shared IP · derived locally
+            </div>
+
+          </div>
+
+
+          <!-- Graph controls -->
+          <div id="graph-modes">
+
+            <button
+              class="mode-btn active"
+              data-mode="detection"
+              type="button"
+            >
+              DETECTION
+            </button>
+
+            <button
+              class="mode-btn"
+              data-mode="investigation"
+              type="button"
+            >
+              INVESTIGATION
+            </button>
+
+            <button
+              id="btn-reset-view"
+              type="button"
+            >
+              RESET VIEW
+            </button>
+
+          </div>
+
+
+          <!-- Empty graph overlay -->
+          <div id="graph-empty" class="stage-overlay">
+
+            <div class="stage-overlay-inner">
+
+              <div class="stage-overlay-title">
+                No transactions ingested
+              </div>
+
+              <div class="stage-overlay-body">
+                Press START to replay the population through the backend.
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- Right rail -->
+        <aside id="right-rail">
+
+          <section class="rail-section">
+
+            <h2 class="rail-title">
+              Candidates
+            </h2>
+
+            <ul id="candidate-list"></ul>
+
+            <div id="candidate-empty" class="empty-state">
+              No scored candidate structures have been returned yet.
+            </div>
+
+          </section>
+
+
+          <section class="rail-section grow">
+
+            <h2 class="rail-title">
+              Investigation
+            </h2>
+
+            <div id="candidate-detail">
+
+              <div class="empty-state">
+                Select a candidate to inspect backend evidence.
+              </div>
+
+            </div>
+
+          </section>
+
+        </aside>
+
+      </main>
+
+
+      <!-- Footer controls -->
+      <footer id="conflux-footer">
+
+        <div class="control-group">
+
+          <button
+            id="btn-start"
+            class="ctl primary"
+            type="button"
+          >
+            START
+          </button>
+
+          <button
+            id="btn-pause"
+            class="ctl"
+            type="button"
+            disabled
+          >
+            PAUSE
+          </button>
+
+          <button
+            id="btn-reset"
+            class="ctl"
+            type="button"
+          >
+            RESET
+          </button>
+
+        </div>
+
+
+        <div id="footer-note">
+          All candidates, scores and tiers are produced by the CONFLUX backend.
+          The frontend performs no detection and no scoring.
+        </div>
+
+
+        <div id="queue-indicator">
+          idle
+        </div>
+
+      </footer>
+
+
+      <!-- Toast notifications -->
+      <div id="toast-container"></div>
+
+    </div>
+
+
+    <!-- Frontend entry point -->
+    <script type="module" src="/src/main.ts"></script>
+
+  </body>
+</html>
