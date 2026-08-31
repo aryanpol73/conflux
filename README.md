@@ -3,8 +3,6 @@ Cross-Merchant Campaign Intelligence
 
 A coordinated structure intelligence system for detecting distributed card-testing and fraud campaigns across merchants, entities, and time.
 
-Built for the Razorpay AI Buildathon · Track 02 — AI Risk Manager
-
 <br/>
 
 <img width="1916" height="1138" alt="image" src="https://github.com/user-attachments/assets/42da6649-a7ae-4e35-9edf-429eee8897ba" />
