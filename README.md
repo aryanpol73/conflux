@@ -1,7 +1,7 @@
 CONFLUX
 Cross-Merchant Campaign Intelligence
 
-CONFLUX is an explainable fraud detection system built to detect coordinated card-testing campaigns across multiple merchants.
+CONFLUX is an explainable fraud detection and investigation system designed to detect coordinated card-testing campaigns across multiple merchants.
 
 Built for the Razorpay AI Buildathon — Track 02: AI Risk Manager.
 
@@ -12,22 +12,24 @@ The Story
 
 Card-testing fraud rarely appears as one obviously bad transaction.
 
-Instead, attackers may rapidly test stolen or generated card credentials using small transactions distributed across multiple merchants. Individual merchants may only see a few seemingly independent attempts. Viewed in isolation, many of those transactions can appear legitimate.
+Instead, attackers may rapidly test stolen or generated card credentials using small transactions distributed across multiple merchants. Individual merchants may only see a few seemingly independent attempts.
 
-The actual signal emerges only when transactions are connected.
+Viewed in isolation, many of those transactions can appear legitimate.
 
-The same card may appear across different merchants. Multiple cards may reuse a device. Different merchants may receive requests from the same IP signature. Activity may suddenly accelerate within a short time window.
+The actual signal emerges only when the transactions are connected.
+
+The same card may appear across different merchants. Multiple cards may reuse a device. Different merchants may receive requests associated with the same IP signature. Activity may suddenly accelerate within a short time window.
 
 CONFLUX is designed to detect that coordinated pattern rather than simply classify one transaction as fraudulent.
 
 The system combines:
 
-transaction-level behavioral signals,
-temporal and cross-entity relationships,
-campaign candidate discovery,
-deterministic campaign risk scoring,
-explainable evidence,
-and a live investigation interface.
+Transaction-level behavioral signals
+Temporal and cross-entity relationships
+Campaign candidate discovery
+Deterministic campaign risk scoring
+Explainable evidence
+A live investigation interface
 
 The core principle is simple:
 
@@ -35,30 +37,30 @@ A transaction is not proof. A coordinated pattern across entities and time is ev
 
 1. The Problem
 
-Distributed card-testing attacks are difficult to detect because the attack is often fragmented.
+Distributed card-testing attacks are difficult to detect because the attack is often fragmented across multiple merchants.
 
 An attacker may:
 
-test many cards,
-distribute attempts across multiple merchants,
-reuse infrastructure such as devices or IPs,
-operate within short bursts,
-use small transaction amounts,
-and avoid making any single merchant's traffic look obviously malicious.
+Test many cards
+Distribute attempts across multiple merchants
+Reuse infrastructure such as devices or IPs
+Operate within short bursts
+Use small transaction amounts
+Avoid making any individual merchant's traffic look obviously malicious
 
 This creates a visibility problem.
 
-A single merchant may see:
+A single merchant might observe:
 
-Card A → Merchant 1
-Card B → Merchant 1
-Card C → Merchant 1
+Card A ──► Merchant 1
+Card B ──► Merchant 1
+Card C ──► Merchant 1
 
-Another merchant may independently see:
+Another merchant might independently observe:
 
-Card A → Merchant 2
-Card D → Merchant 2
-Card E → Merchant 2
+Card A ──► Merchant 2
+Card D ──► Merchant 2
+Card E ──► Merchant 2
 
 Neither merchant necessarily sees the full campaign.
 
@@ -66,11 +68,16 @@ CONFLUX connects the observations:
 
                   Card A
                  /      \
-          Merchant 1   Merchant 2
-              |             |
-           Device X ------ IP Y
+                /        \
+         Merchant 1    Merchant 2
+              |            |
+              └────┐  ┌────┘
+                   │  │
+                Device X
+                   │
+                 IP Y
 
-The suspicious behavior is therefore not just:
+The important question is therefore not simply:
 
 "Is this transaction risky?"
 
@@ -80,47 +87,72 @@ It is:
 
 2. What CONFLUX Does
 
-CONFLUX processes transactions and progressively builds an investigation picture.
+CONFLUX progressively builds an investigation picture from incoming transactions.
+
+Incoming Transactions
+        │
+        ▼
+Transaction Processing
+        │
+        ▼
+Entity & Temporal Relationships
+        │
+        ▼
+Campaign Candidate Discovery
+        │
+        ▼
+Campaign Feature Extraction
+        │
+        ▼
+Campaign Risk Scoring
+        │
+        ├──────────────► Risk Score
+        ├──────────────► Risk Tier
+        ├──────────────► Recommended Action
+        │
+        ▼
+Explainable Evidence
+        │
+        ▼
+Live Investigation Console
 
 The system:
 
-Receives transactions.
-Maintains transaction and entity relationships.
-Identifies connected campaign candidates.
-Evaluates those candidates using campaign-level signals.
-Assigns a risk score and tier.
-Produces an explainable recommended action.
-Streams the results to an investigation console.
+Receives transactions
+Maintains transaction and entity relationships
+Identifies connected campaign candidates
+Evaluates those candidates using campaign-level signals
+Assigns a risk score and tier
+Produces explainable evidence
+Streams results to an investigation interface
 
-The important distinction is that CONFLUX is not just a transaction fraud classifier.
+CONFLUX is therefore not just a transaction fraud classifier.
 
 It is a:
 
-Coordinated cross-merchant campaign detection system.
+Coordinated Cross-Merchant Campaign Detection System
 
-3. What Makes a Campaign "Cross-Merchant"?
+3. What Makes a Campaign Cross-Merchant?
 
-Cross-merchant behavior is a central part of the project.
+Cross-merchant intelligence is central to CONFLUX.
 
-For example, during backend testing, two transactions belonging to the same detected candidate were verified against the dataset:
+During backend validation, transactions belonging to the same detected candidate were verified across different merchants.
 
-Transaction A → Merchant M0137
-Transaction B → Merchant M0148
+Transaction A ──► Merchant M0137
+Transaction B ──► Merchant M0148
 
-Shared card fingerprint:
+Shared Card Fingerprint:
 918040a152fbf88a
 
 Result:
 
 UNIQUE MERCHANTS: 2
 
-RESULT: CROSS-MERCHANT = YES
+CROSS-MERCHANT = YES
 
-This demonstrates the core CONFLUX idea:
+The transactions occurred at different merchants but shared an entity relationship that allowed the backend to connect them into a campaign candidate.
 
-The transactions occurred at different merchants, but shared an entity relationship that allowed the backend to connect them into a campaign candidate.
-
-The graph and campaign logic can connect transactions through entities such as:
+CONFLUX can connect transactions through entities such as:
 
 Card fingerprint
 BIN
@@ -129,7 +161,7 @@ IP signature
 Merchant
 Temporal proximity
 
-A campaign therefore becomes suspicious when multiple forms of evidence reinforce one another.
+A campaign becomes suspicious when multiple forms of evidence reinforce one another.
 
 4. Dataset
 
@@ -139,11 +171,9 @@ The dataset was designed specifically for this project rather than relying on a 
 
 The design goal was to ensure that the detection problem required multi-signal reasoning.
 
-Frozen dataset
+Frozen Dataset
 dataset_v4_final.csv
-
-Dataset characteristics include:
-
+Dataset Characteristics
 Property	Value
 Total transactions	31,873
 Attack rate	6.40%
@@ -153,17 +183,17 @@ Legitimate hard negatives	Included
 Identifier overlap between populations	Included
 Independent IP field	Included
 
-The dataset intentionally includes difficult cases where legitimate traffic can resemble suspicious behavior.
+The dataset intentionally includes difficult cases where legitimate traffic can resemble suspicious activity.
 
 Examples include:
 
-benign transaction bursts,
-entity reuse,
-overlapping identifiers,
-shared BINs,
-and traffic patterns that should not automatically be treated as attacks.
+Benign transaction bursts
+Entity reuse
+Overlapping identifiers
+Shared BINs
+Legitimate traffic patterns that should not automatically be treated as attacks
 
-This prevents the solution from relying on a simplistic shortcut such as:
+This prevents the system from relying on simplistic shortcuts such as:
 
 "High BIN risk = campaign."
 
@@ -171,34 +201,53 @@ That is explicitly not the CONFLUX design.
 
 5. Detection Architecture
 
-The system works in layers.
+CONFLUX operates in layers.
 
-Incoming Transactions
-        │
-        ▼
-Transaction Processing
-        │
-        ├──────────────► Transaction-level behavioral features
-        │
-        ▼
-Temporal Entity Relationships
-        │
-        ▼
-Campaign Candidate Discovery
-        │
-        ▼
-Campaign Feature Extraction
-        │
-        ▼
-Deterministic Campaign Risk Scorer
-        │
-        ├────────────► Risk Score
-        ├────────────► Risk Tier
-        ├────────────► Recommended Action
-        └────────────► Explainable Evidence
-                              │
-                              ▼
-                    Live Investigation Console
+┌─────────────────────────────┐
+│     Incoming Transactions   │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│ Transaction-Level Processing│
+│  Behavioral Feature Signals │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│ Temporal Cross-Entity Graph │
+│                             │
+│ Card · BIN · Device · IP    │
+│ Merchant · Transaction      │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│ Campaign Candidate Discovery│
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│ Campaign Feature Extraction │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│ Deterministic Campaign      │
+│ Risk Scorer                 │
+└──────────────┬──────────────┘
+               │
+       ┌───────┼────────┐
+       ▼       ▼        ▼
+    Score     Tier    Action
+       │
+       ▼
+┌─────────────────────────────┐
+│ Explainable Campaign Evidence│
+└──────────────┬──────────────┘
+               │
+               ▼
+        Investigation Console
 6. Transaction-Level Behavioral Modeling
 
 CONFLUX includes transaction-level behavioral feature engineering.
@@ -212,11 +261,11 @@ Merchant pattern behavior
 Velocity
 Decline behavior
 
-Feature construction follows causal and temporal constraints so that future transactions are not used to explain earlier ones.
+Feature construction follows causal and temporal constraints so that future transactions are not used to explain earlier transactions.
 
 A logistic regression baseline was developed as part of the modeling pipeline.
 
-The ML layer provides useful behavioral signal, but CONFLUX deliberately does not treat transaction-level ML output as sufficient evidence of a coordinated campaign.
+However, transaction-level ML output is not treated as sufficient evidence of a coordinated campaign.
 
 Campaign detection requires relationship-level evidence.
 
@@ -233,34 +282,38 @@ Merchant
 Device
 IP
 
-A transaction creates relationships between the entities involved.
+Each transaction creates relationships between the entities involved.
 
-Conceptually:
+                    Card
+                     │
+                     │
+BIN ─────────── Transaction ───────── Merchant
+                     │
+              ┌──────┴──────┐
+              │             │
+            Device          IP
 
-Card ─────┐
-BIN ──────┤
-Device ───┼── Transaction ─── Merchant
-IP ───────┘
-
-As more transactions arrive, these relationships can reveal connected structures.
+As additional transactions arrive, these relationships can reveal connected structures.
 
 For example:
 
-Card A ─ Transaction 1 ─ Merchant X
+Card A ── Transaction 1 ── Merchant X
    │
-   └──── Transaction 2 ─ Merchant Y
+   └────── Transaction 2 ── Merchant Y
 
-Device D ─ Transaction 1
-Device D ─ Transaction 3 ─ Merchant Z
+
+Device D ── Transaction 1
+   │
+   └────── Transaction 3 ── Merchant Z
 
 Individually, these transactions may appear unrelated.
 
-Together, they may reveal:
+Together, they can reveal:
 
-cross-merchant activity,
-shared infrastructure,
-entity reuse,
-and temporal coordination.
+Cross-merchant activity
+Shared infrastructure
+Entity reuse
+Temporal coordination
 8. Campaign Candidate Discovery
 
 The graph layer identifies groups of transactions that may represent coordinated activity.
@@ -269,44 +322,50 @@ Candidate generation intentionally casts a reasonably broad net.
 
 A candidate is not automatically a confirmed attack.
 
-Instead:
+The pipeline separates discovery from risk assessment:
 
-Candidate
-    ↓
-Feature extraction
-    ↓
-Campaign scoring
-    ↓
-Risk tier + evidence
+Connected Transactions
+        │
+        ▼
+Campaign Candidate
+        │
+        ▼
+Campaign Feature Extraction
+        │
+        ▼
+Campaign Risk Scoring
+        │
+        ▼
+Risk Tier + Evidence + Action
 
 This separation is important.
 
-Candidate discovery answers:
+Candidate Discovery answers:
 
-"What transactions might belong together?"
+What transactions might belong together?
 
-Campaign scoring answers:
+Campaign Scoring answers:
 
-"How suspicious is that connected group?"
+How suspicious is that connected group?
 
 9. Campaign Risk Scoring
 
 CONFLUX uses a deterministic and explainable campaign-level scorer.
 
-The scorer evaluates evidence across the connected transaction group.
+The scorer evaluates evidence across a connected transaction group.
 
-Signals can include relationship and topology characteristics such as:
+Campaign-level signals can include structural and relationship characteristics such as:
 
-shared entity reuse,
-number of transactions connected through shared cards,
-link density,
-merchant diversity,
-BIN diversity,
-multi-entity link fraction,
-transaction concentration,
-and other campaign-level structural signals.
+Shared entity reuse
+Transactions connected through shared cards
+Link density
+Merchant diversity
+BIN diversity
+Multi-entity link fraction
+Transaction concentration
+Other campaign-level structural signals
 
-A real backend response, for example, can return evidence like:
+A campaign response can expose evidence such as:
 
 {
   "candidate_id": "CAND-000004",
@@ -335,52 +394,46 @@ A real backend response, for example, can return evidence like:
   }
 }
 
-This is important for the project philosophy.
+This means the system does not merely say:
 
-The UI does not need to say merely:
+Risk Score: 0.54
 
-"Risk score: 0.54"
+It can answer:
 
-It can show:
+Why did this campaign receive that score?
 
-Why did the system assign that score?
-
-10. Risk Tiers and Actions
+10. Risk Tiers and Recommended Actions
 
 Campaigns are assigned risk levels and recommended actions.
 
-Typical outputs include:
-
-Risk Tier	Action
+Risk Tier	Typical Response
 LOW	Monitor / no immediate intervention
 MEDIUM	REVIEW
 HIGH	Escalated intervention
 
-The exact action returned to the frontend comes from the backend scoring pipeline.
+The exact action returned to the frontend originates from the backend scoring pipeline.
 
-The system is designed to support investigation rather than hide its reasoning behind a black-box prediction.
+CONFLUX is designed to support investigation rather than hide its reasoning behind a black-box prediction.
 
 11. Explainability
 
-Explainability is a core requirement of CONFLUX.
+Explainability is a core part of the CONFLUX design.
 
 For every scored campaign, the backend can expose evidence including:
 
-campaign ID,
-connected transaction IDs,
-risk score,
-risk tier,
-recommended action,
-and the top contributing signals.
+Campaign ID
+Connected transaction IDs
+Risk score
+Risk tier
+Recommended action
+Top contributing signals
 
-This allows a reviewer to understand the reasoning behind the alert.
-
-The goal is:
+The reasoning can therefore be represented as:
 
 Suspicious Campaign
         │
         ▼
-Why?
+       Why?
         │
         ├── Shared card reuse
         ├── Cross-merchant connections
@@ -390,33 +443,43 @@ Why?
 
 Rather than:
 
-AI says fraud.
-12. Backend
+"AI says fraud."
+
+12. Backend Architecture
 
 The backend is implemented in Python using FastAPI.
 
-The primary backend responsibilities include:
+Its primary responsibilities include:
 
-receiving transactions,
-maintaining in-memory transaction state,
-discovering candidates,
-scoring campaigns,
-exposing campaign results,
-exposing health information,
-and supporting live frontend communication.
-API architecture
+Receiving transactions
+Maintaining in-memory transaction state
+Maintaining entity relationships
+Discovering campaign candidates
+Scoring campaigns
+Exposing campaign results
+Providing health information
+Supporting live frontend communication
+API Architecture
+                  ┌──────────────────────┐
+                  │   Investigation UI   │
+                  │      Frontend        │
+                  └──────────┬───────────┘
+                             │
+              ┌──────────────┴──────────────┐
+              │                             │
+              ▼                             ▼
+        REST API                       WebSocket
+              │                             │
+              └──────────────┬──────────────┘
+                             ▼
+                  ┌──────────────────────┐
+                  │   CONFLUX Backend    │
+                  │      FastAPI         │
+                  └──────────────────────┘
 
-The backend provides REST endpoints for querying system state and uses WebSocket communication as the primary live channel.
+REST endpoints provide state and campaign retrieval.
 
-Conceptually:
-
-Frontend
-   │
-   ├── REST ─────────────► Backend state / campaigns
-   │
-   └── WebSocket ────────► Live transaction updates
-
-The WebSocket channel is intended to drive the live investigation experience, while REST provides fallback and state retrieval.
+The WebSocket channel supports live transaction and investigation updates.
 
 13. Backend Health
 
@@ -431,103 +494,122 @@ Example response:
   "active_websocket_clients": 0
 }
 
-The health endpoint also confirms that the campaign scoring artifact was successfully loaded.
+The health check confirms that the campaign scoring system successfully loads.
+
+Live backend:
+
+CONFLUX API
 
 14. Deployment
 
 The CONFLUX backend is deployed as a live FastAPI service.
 
-Backend API:
-
-CONFLUX API
-
-Health endpoint:
-
-CONFLUX API Health Check
-
-The deployment uses:
-
+Deployment Stack
 Python
 FastAPI
 Uvicorn
 Render
 
-The Render startup configuration uses:
+The service starts using:
 
 PYTHONPATH=src uvicorn conflux.api.main:app --host 0.0.0.0 --port $PORT
 
-Render supplies the deployment port through $PORT.
+The deployment platform provides the runtime port through $PORT.
 
+Health Check
+
+CONFLUX API Health Check
+
+A successful deployment confirms that:
+
+✓ API is running
+✓ FastAPI application started
+✓ Campaign scorer loaded
+✓ Model/scoring artifacts accessible
+✓ Backend ready for frontend communication
 15. Frontend
 
-CONFLUX includes a separate frontend application built as a Vite-based vanilla TypeScript application.
+CONFLUX includes a separate frontend application built with:
+
+Vite
+TypeScript
+HTTP API communication
+WebSocket-based live updates
 
 The frontend and backend are intentionally decoupled.
 
-Frontend
-    │
-    │ HTTP / WebSocket
-    ▼
-CONFLUX Backend
+┌──────────────────────┐
+│      Frontend        │
+│ Investigation Console│
+└──────────┬───────────┘
+           │
+     HTTP / WebSocket
+           │
+           ▼
+┌──────────────────────┐
+│   CONFLUX Backend    │
+│      FastAPI         │
+└──────────────────────┘
 
-The frontend acts as an Investigation Console, not just a generic fraud dashboard.
+The frontend is designed as an investigation console, not simply a generic fraud dashboard.
 
-Its purpose is to make the progression of the attack visible.
+Its purpose is to make the progression of coordinated activity visible.
 
-The intended experience is:
-
-Apparently independent transactions
-                ↓
-       Entity relationships emerge
-                ↓
-      Candidate campaign forms
-                ↓
-       Campaign risk increases
-                ↓
-       Evidence becomes visible
-                ↓
-      Reviewer receives action
+Apparently Independent Transactions
+                │
+                ▼
+       Entity Relationships Emerge
+                │
+                ▼
+        Campaign Candidate Forms
+                │
+                ▼
+         Campaign Risk Increases
+                │
+                ▼
+          Evidence Becomes Visible
+                │
+                ▼
+        Reviewer Receives Action
 16. Investigation Console
 
-The frontend focuses on making campaign reasoning visible.
+The investigation experience focuses on making campaign reasoning understandable.
 
 The interface includes concepts such as:
 
-system status,
-transaction activity,
-campaign summaries,
-risk tiers,
-campaign alerts,
-campaign details,
-top contributing signals,
-connected entities,
-and graph-based investigation.
+System status
+Transaction activity
+Campaign summaries
+Risk tiers
+Campaign alerts
+Campaign details
+Top contributing signals
+Connected entities
+Graph-based investigation
 
-The centerpiece is the ability to visualize how transactions are connected through entities.
-
-Instead of presenting fraud detection as only:
+The goal is not simply to display:
 
 Risk = 87%
 
-CONFLUX aims to show:
+Instead, the system aims to show the relationships behind the decision:
 
 Transaction A
        │
        ├── Shared Card
        │
-Transaction B ─── Merchant 1
+Transaction B ───── Merchant 1
        │
        └── Shared Device / IP
        │
-Transaction C ─── Merchant 2
+Transaction C ───── Merchant 2
 
 This makes the cross-merchant campaign structure understandable to a human reviewer.
 
 17. Live Transaction Flow
 
-The system can process transactions progressively.
+CONFLUX can process transactions progressively.
 
-During backend testing, transaction ingestion produced results such as:
+During backend testing, transaction ingestion produced behavior such as:
 
 Sending 8 transactions
 
@@ -548,23 +630,22 @@ Evidence builds as additional transactions and entity relationships appear.
 
 18. Example Campaign Output
 
-After transactions are processed, the campaigns endpoint can return a summary like:
+After transactions are processed, campaign results can be summarized as:
 
-Transactions: 8
-Candidates: 7
-Scored campaigns: 1
+Transactions:       8
+Candidates:         7
+Scored Campaigns:   1
 
-High risk: 0
-Medium risk: 1
-Low risk: 0
-
-Example detected campaign:
-
-Candidate: CAND-000004
+High Risk:          0
+Medium Risk:        1
+Low Risk:           0
+Example Detected Campaign
+Candidate:
+CAND-000004
 
 Transactions:
-- 9598253c...
-- f66cd021...
+9598253c...
+f66cd021...
 
 Score:
 0.549
@@ -575,16 +656,16 @@ MEDIUM
 Recommended Action:
 REVIEW
 
-The two transactions were independently verified as occurring at different merchants:
+The connected transactions were independently verified across different merchants:
 
-M0137
-M0148
+Merchant M0137
+Merchant M0148
 
 while sharing the same card fingerprint.
 
 Therefore:
 
-Cross-Merchant = YES
+CROSS-MERCHANT = YES
 
 19. Repository Structure
 
@@ -601,12 +682,22 @@ conflux/
 │
 ├── src/
 │   └── conflux/
+│       │
 │       ├── api/
+│       │   ├── main.py
+│       │   ├── schemas.py
+│       │   ├── state.py
+│       │   └── websocket.py
+│       │
 │       ├── evaluation/
+│       │
 │       ├── features/
+│       │
 │       ├── graph/
+│       │
 │       ├── models/
 │       │   └── artifacts/
+│       │
 │       └── scoring/
 │
 ├── tests/
@@ -619,83 +710,103 @@ conflux/
 ├── requirements.txt
 └── render.yml
 
-Some directories and internal modules may evolve as the project is polished.
+The project structure separates:
 
+API and service logic
+Feature engineering
+Graph processing
+Modeling artifacts
+Campaign scoring
+Evaluation
+Testing
+Frontend implementation
 20. Model and Scoring Artifacts
 
-The backend loads trained/scoring artifacts from:
+The backend loads production scoring artifacts from:
 
 src/conflux/models/artifacts/
 
-Tracked artifacts include scoring references and metadata required by the production campaign scorer.
+Tracked artifacts include scoring references and metadata required by the campaign scorer.
 
-The deployed health check confirms that the scoring system successfully loads:
+The deployed health check confirms:
 
 "scorer_loaded": true
 
-This is critical because the frontend is not displaying invented campaign data—the backend is responsible for generating actual candidate and scoring outputs.
+This is important because the frontend is not intended to display invented campaign results.
+
+Campaign candidates, scores, evidence, and actions originate from the actual backend pipeline.
 
 21. Evaluation and Validation
 
-The project development process included more than simply training a model and checking accuracy.
+The CONFLUX development process involved more than training a model and checking a single accuracy metric.
 
 Validation work included:
 
-feature specification,
-leakage auditing,
-temporal/causal reasoning checks,
-candidate diagnostics,
-campaign scoring validation,
-robustness testing,
-adversarial testing,
-benign burst testing,
-false-positive stress testing,
-changed attack cadence,
-weaker entity reuse,
-increased legitimate traffic,
-unseen campaign behavior,
-and temporal boundary cases.
+Feature specification
+Leakage auditing
+Temporal and causal reasoning checks
+Candidate diagnostics
+Campaign scoring validation
+Robustness testing
+Adversarial testing
+Benign burst testing
+False-positive stress testing
+Changed attack cadence
+Weaker entity reuse
+Increased legitimate traffic
+Unseen campaign behavior
+Temporal boundary cases
 
-The production campaign scorer was deliberately chosen to be deterministic and explainable.
+The production campaign scorer was deliberately designed to be deterministic and explainable.
 
-This was a design decision.
+This was an intentional design decision.
 
 For an AI Risk Manager use case, a reviewer needs to understand:
 
-what triggered the campaign,
-what evidence connected the transactions,
-and why the recommended action was produced.
+What triggered the campaign?
+        │
+        ▼
+What evidence connected the transactions?
+        │
+        ▼
+Why was this risk score assigned?
+        │
+        ▼
+Why is this action recommended?
 22. Key Design Decisions
-1. Campaigns, not just transactions
+1. Campaigns, Not Just Transactions
 
 A suspicious transaction alone is weak evidence.
 
 The stronger signal is coordinated behavior across:
 
 Entities + Relationships + Time
-2. Cross-merchant evidence matters
 
-The system is designed specifically to identify relationships that individual merchants may not see.
+2. Cross-Merchant Evidence Matters
 
-3. BIN alone is not campaign evidence
+The system is specifically designed to identify relationships that individual merchants may not be able to see independently.
+
+3. BIN Alone Is Not Campaign Evidence
 
 A risky or frequently associated BIN is not sufficient proof of a coordinated campaign.
 
-Campaign detection requires stronger combined evidence.
+Campaign detection requires combined evidence.
 
-4. Explainability over unnecessary black-box complexity
+4. Explainability Over Unnecessary Black-Box Complexity
 
-A deterministic campaign scorer was selected for the production path because it makes the decision process inspectable.
+A deterministic campaign scorer was selected for the production path because its decision process can be inspected and explained.
 
-5. No fake evidence for the demo
+5. No Fake Evidence for the Demo
 
-The investigation interface should be driven by actual backend output.
+The investigation interface is intended to be driven by real backend output.
 
-Scores, campaigns, entities, evidence, and actions should originate from the backend rather than being manually invented for visual effect.
+Scores, campaigns, entities, evidence, and actions should originate from the actual detection and scoring pipeline.
 
-6. Temporal causality matters
+6. Temporal Causality Matters
 
-The system is designed around the principle that earlier decisions should not use future transaction information.
+Earlier decisions should not depend on future transaction information.
+
+The system is designed around this principle throughout feature construction and temporal analysis.
 
 23. Technology Stack
 Backend
@@ -709,35 +820,27 @@ Joblib
 Pydantic
 Frontend
 Vite
-Vanilla TypeScript
-WebSocket-based live communication
+TypeScript
+REST API communication
+WebSocket-based live updates
 Deployment
 GitHub
 Render
 24. Running the Backend Locally
-
-Install dependencies:
-
+Install Dependencies
 pip install -r requirements.txt
-
-Start the API:
-
+Start the API
 PYTHONPATH=src uvicorn conflux.api.main:app --reload
 
-On Windows PowerShell, the environment variable syntax may differ depending on the shell configuration.
+On Windows PowerShell, environment variable syntax may differ depending on shell configuration.
 
-The API can then be accessed locally at:
+The backend exposes a health endpoint once running.
 
-http://127.0.0.1:8000
-
-Health check:
-
-http://127.0.0.1:8000/health
 25. Current Project Status
 Component	Status
 Synthetic Dataset v4	✅ Complete
 Feature Engineering	✅ Complete
-Transaction-level ML Baseline	✅ Complete
+Transaction-Level ML Baseline	✅ Complete
 Leakage / Feature Validation	✅ Complete
 Cross-Entity Temporal Graph	✅ Complete
 Campaign Candidate Discovery	✅ Complete
@@ -746,9 +849,9 @@ Explainable Evidence Output	✅ Complete
 Robustness / Adversarial Testing	✅ Complete
 FastAPI Backend	✅ Complete
 WebSocket Live Channel	✅ Complete
-Backend Deployment	✅ Live
-Frontend Investigation Console	✅ Functional / actively polishing
-Final Demo Polish	🔧 In progress
+Backend Deployment	🟢 Live
+Frontend Investigation Console	🟢 Functional / polishing
+Final Demo Polish	🔧 In Progress
 26. Project Philosophy
 
 CONFLUX is built around a few principles:
@@ -784,7 +887,9 @@ Devices
 IPs
    +
 Time
-        ↓
-      CONFLUX
-        ↓
+   │
+   ▼
+CONFLUX
+   │
+   ▼
 Coordinated Campaign Intelligence
