@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: conflux-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: PYTHONPATH=src uvicorn conflux.api.main:app --host 0.0.0.0 --port $PORT
