@@ -1,0 +1,96 @@
+﻿
+      spearman_matrix,
+  )
+  from conflux.scoring.config import (  # noqa: E402
+      ASSIGNMENTS_PATH, BIN_FEATURES, CANDIDATES_PATH, CORE_FEATURES,
+      CORE_FEATURE_NAMES, FEATURE_SIGNS, FROZEN_PATHS, N_FOLDS,
+      SCORING_OUT_DIR, SCORING_SCHEMA_VERSION, SPLIT_SEEDS,
+  )
+  from conflux.scoring.deterministic_scorer import (  # noqa: E402
+>     DeterministicScorer, tune_weights,
+  )
+  from conflux.scoring.evaluation import (  # noqa: E402
+      apply_preregistered_rule, average_precision, bootstrap_ci, campaign_metrics,
+      comparator_scores, confusion, normalize_purity, precision_at_k,
+      recall_exchange_table, render_exchange_table, roc_auc, select_threshold,
+  )
+  from conflux.scoring.splits import (  # noqa: E402
+      campaign_grouped_folds, chronological_candidate_split, cluster_ids,
+      split_feasibility_probe,
+  )
+  
+  log = logging.getLogger("conflux.scoring.run_scoring_evaluation")
+          test_frame = features.iloc[te]
+  
+          weights = None
+          if tuned:
+              weights = tune_weights(train_frame[names], y[tr], names,
+                                     objective=average_precision,
+                                     signs=FEATURE_SIGNS)
+  
+>         ref = DeterministicScorer.fit(train_frame[names], names,
+                                        signs=FEATURE_SIGNS, weights=weights,
+                                        fit_scope=f"A:r{fold.repeat}f{fold.fold} train")
+>         s_tr, _ = DeterministicScorer.transform(ref, train_frame[names])
+>         s_te, _ = DeterministicScorer.transform(ref, test_frame[names])
+  
+          oof_sum[te] += s_te; oof_n[te] += 1
+  
+          sel = select_threshold(y[tr], s_tr, rule="max_f1")
+          ap = average_precision(y[te], s_te)
+          praucs.append(ap)
+          per_fold.append({
+              **fold.as_dict(),
+              "weights": ref.as_dict()["weights"],
+              "threshold_selected_on_train": sel,
+              "held_out_pr_auc": round(ap, 6) if np.isfinite(ap) else None,
+              "held_out_roc_auc": round(roc_auc(y[te], s_te), 6),
+      weight_decision = (apply_preregistered_rule(uniform_praucs, tuned_praucs)
+                         if tuned_praucs else
+                         {"decision": "keep_uniform_weights",
+                          "note": "tuned comparison skipped via --skip-tuned"})
+  
+      # ---- 5. Protocol B ---------------------------------------------------
+      tr, va, te, chrono_probe_meta = chronological_candidate_split(features)
+      y = features["is_attack_containing"].to_numpy(dtype=int)
+>     ref_b = DeterministicScorer.fit(features.iloc[tr][core], core,
+                                      signs=FEATURE_SIGNS,
+                                      fit_scope="B: chronological train only")
+>     s_va, _ = DeterministicScorer.transform(ref_b, features.iloc[va][core])
+>     s_te, _ = DeterministicScorer.transform(ref_b, features.iloc[te][core])
+      sel_b = select_threshold(y[va], s_va, rule="max_f1")   # validation, not test
+      protocol_b = {
+          "split": chrono_probe_meta,
+          "threshold_selected_on_validation": sel_b,
+          "test_pr_auc": round(average_precision(y[te], s_te), 6),
+          "test_roc_auc": round(roc_auc(y[te], s_te), 6),
+          "test_at_validation_threshold": confusion(y[te], s_te, sel_b["threshold"]),
+          "test_campaign_metrics": campaign_metrics(features.iloc[te], s_te,
+                                                    sel_b["threshold"]),
+          "caveat": ("test metrics use a threshold chosen on validation; no metric "
+                     "here is reported at a threshold chosen on the same rows."),
+      }
+                         "candidate created, merged, split or re-ordered."),
+          "phase3b_artifact_sha256": artifact_hashes_before,
+          "population": population,
+          "feature_design": {
+              "core_features": [
+                  {"name": f.name, "family": f.family, "sign": f.sign,
+                   "source": f.source, "rationale": f.rationale}
+                  for f in CORE_FEATURES],
+>             "retained_after_decorrelation": core,
+>             "dropped_by_correlation_cap": dropped,
+              "spearman_on_unlabelled_training_population": corr.to_dict(),
+              "notes": sf.notes,
+          },
+          "split_feasibility_probe": split_feasibility_probe(features),
+          "protocol_a_campaign_grouped": protocol_a,
+          "protocol_b_chronological": protocol_b,
+          "weight_decision_preregistered": weight_decision,
+          "comparator_rankers": comparators,
+          "secondary_positive_definition_campaign_majority": secondary,
+          "recall_exchange_table": exchange.to_dict("records"),
+      }
+  
+
+

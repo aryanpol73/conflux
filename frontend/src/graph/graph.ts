@@ -250,6 +250,7 @@ export class ConfluxGraph {
         if (node.kind === 'candidate') {
           const text = document.createElementNS(SVG_NS, 'text');
           text.setAttribute('class', 'node-label');
+          text.setAttribute('fill', '#AAB6C5');
           text.setAttribute('text-anchor', 'middle');
           text.setAttribute('dy', String(-node.radius - 8));
           text.textContent = node.label;

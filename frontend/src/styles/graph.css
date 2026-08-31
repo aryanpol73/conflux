@@ -86,7 +86,7 @@
 .node-label {
   font-family: var(--font-mono);
   font-size: 9.5px;
-  fill: var(--text-dim);
+  fill: #AAB6C5;
   letter-spacing: 0.08em;
   pointer-events: none;
 }
