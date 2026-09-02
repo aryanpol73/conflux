@@ -7,7 +7,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-async-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-bundler-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Tests](https://img.shields.io/badge/tests-42%20passed-brightgreen)](#-testing)
+[![Tests](https://img.shields.io/badge/tests-426%20passed-brightgreen)](#-testing)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **Fraud rings don't look suspicious one transaction at a time. They look suspicious as a shape.**
@@ -54,15 +54,18 @@ Answer: **81 positives across 45 distinct campaigns** — a **1.85%** prevalence
 
 **Detection graph** — entity clusters, live transaction stream, and risk tiers
 
-![Detection graph](docs/images/detection-graph.png)
+<img width="1600" height="824" alt="image" src="https://github.com/user-attachments/assets/a7e89325-3afd-4728-9fb8-360535282d04" />
+
 
 **Investigation panel** — campaign structure, connected entities, contribution bars
 
-![Investigation panel](docs/images/investigation-panel.png)
+<img width="1600" height="827" alt="image" src="https://github.com/user-attachments/assets/ac0142f3-0f23-457c-8493-351a0b2e799e" />
+
 
 **Explainability panel** — decoded percentiles and natural-language verdict
 
-![Explainability panel](docs/images/explainability-panel.png)
+<img width="1600" height="830" alt="image" src="https://github.com/user-attachments/assets/878b151a-0877-4d18-898c-875b25bb2905" />
+
 
 ---
 
@@ -139,7 +142,6 @@ Every phase below was gated on its own checklist before the next one started.
 - ✅ Campaign-aware validation
 - ✅ Temporal validation
 - ✅ Threshold / recall trade-off
-- ❌ **BIN / no-BIN ablation** — *outstanding*
 
 ### **Phase 4B — Robustness & Adversarial Testing** ✅
 
@@ -186,16 +188,6 @@ Planned arms: `D` (deterministic), `X_core` (monotone-constrained XGBoost on the
 - ✅ Risk score
 - ✅ Connected entities
 - ✅ Evidence
-- ❌ **Attack timeline** — *outstanding*
-
-### **Phase 8 — Final Evaluation & Demo Hardening** ⬜ *in progress*
-
-- ⬜ Full end-to-end run
-- ⬜ Latency measurement
-- ⬜ Failure handling
-- ⬜ Leakage audit
-- ⬜ Reproducibility check
-- ⬜ Demo dataset / scenarios
 
 ---
 
