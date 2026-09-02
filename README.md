@@ -1,743 +1,617 @@
-CONFLUX
-Cross-Merchant Campaign Intelligence
+<div align="center">
 
-A coordinated structure intelligence system for detecting distributed card-testing and fraud campaigns across merchants, entities, and time.
+# **CONFLUX**
+### **Coordinated Structure Intelligence for Card-Fraud Campaigns**
 
-<br/>
+[![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-async-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-bundler-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Tests](https://img.shields.io/badge/tests-42%20passed-brightgreen)](#-testing)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-<img width="1916" height="1138" alt="image" src="https://github.com/user-attachments/assets/42da6649-a7ae-4e35-9edf-429eee8897ba" />
+**Fraud rings don't look suspicious one transaction at a time. They look suspicious as a shape.**
 
+</div>
 
-1. What CONFLUX Does
+---
 
-Card-testing fraud rarely shows up as one obviously bad transaction.
+## **Table of Contents**
 
-Instead, it appears as a pattern distributed across many merchants, cards, devices, IPs, and transactions over a short period of time. A single transaction may look completely normal when viewed in isolation.
+- [**What CONFLUX Does**](#-what-conflux-does)
+- [**Screenshots**](#-screenshots)
+- [**How It Works**](#-how-it-works)
+- [**The Deterministic Scorer**](#-the-deterministic-scorer)
+- [**Explainability Layer**](#-explainability-layer)
+- [**Build Phases**](#-build-phases)
+- [**Architecture**](#-architecture)
+- [**Folder Structure**](#-folder-structure)
+- [**Quickstart**](#-quickstart)
+- [**API Reference**](#-api-reference)
+- [**Testing**](#-testing)
+- [**Deployment**](#-deployment)
+- [**Honest Limitations**](#-honest-limitations)
+- [**Roadmap**](#-roadmap)
+- [**Topics**](#-topics)
 
-CONFLUX is built to detect the pattern, not just the transaction.
+---
 
-It:
+## **What CONFLUX Does**
 
-Scores individual transactions using behavioral ML features.
-Builds a cross-entity graph connecting Cards, BINs, Devices, IP signatures, Merchants, and Transactions.
-Detects related groups of activity as candidate coordinated structures.
-Scores those groups as campaigns, rather than treating every transaction independently.
-Provides a transparent and explainable risk score with supporting evidence.
-Surfaces a recommended action for investigation:
+Conventional fraud scoring asks *"is this transaction bad?"* — one row at a time. CONFLUX asks a different question: **"is this transaction part of a coordinated campaign?"**
 
-REVIEW · STEP-UP · BLOCK
+It builds a **temporal entity graph** over the transaction stream, linking rows that share payment instruments, devices, IPs, or merchants. Connected sub-graphs become **candidates**. Each candidate is scored by a transparent, six-feature **percentile scorer**, assigned a risk tier, and shipped to the dashboard with a plain-English explanation of *why* it scored the way it did.
 
-Core Design Principle
-A transaction is not proof. A coordinated pattern is evidence.
+The core research question driving the whole build:
 
-No single signal is ever treated as proof of a campaign.
+> Of **4,372** multi-transaction candidates discovered **without ever touching `campaign_id`**, how many actually correspond to genuinely coordinated campaigns?
 
-For example:
+Answer: **81 positives across 45 distinct campaigns** — a **1.85%** prevalence. That low base rate is the reason every design decision below leans toward campaign-grouped validation and away from anything that can silently memorise a ring.
 
-A suspicious BIN alone is not enough.
-A shared device alone is not enough.
-A burst of transactions alone is not enough.
+---
 
-A campaign requires combined evidence:
+## **Screenshots**
 
-Cross-Entity Overlap
-+ Temporal Structure
-+ Behavioral Signals
-+ Campaign-Level Evidence
+**Detection graph** — entity clusters, live transaction stream, and risk tiers
 
-2. The Problem — Razorpay Track 02: AI Risk Manager
+![Detection graph](docs/images/detection-graph.png)
 
-CONFLUX focuses on detecting distributed card-testing attacks.
+**Investigation panel** — campaign structure, connected entities, contribution bars
 
-In a typical card-testing campaign, attackers rapidly test stolen or generated card details through small transactions. The goal is to identify cards that successfully authorize before they are used for larger fraudulent activity.
+![Investigation panel](docs/images/investigation-panel.png)
 
-These attacks are difficult to detect because they are often:
+**Explainability panel** — decoded percentiles and natural-language verdict
 
-Distributed Across Merchants
+![Explainability panel](docs/images/explainability-panel.png)
 
-No individual merchant necessarily sees the complete attack.
+---
 
-Fast
+## **How It Works**
 
-The campaign can emerge as a burst of activity within a short observation window.
+**1. Ingestion** — `POST /transactions` validates the payload against a strict schema. Ground-truth fields (`label`, `campaign_id`) are **rejected with HTTP 422**; the API is structurally incapable of accepting the answer key at inference time.
 
-Designed to Blend In
+**2. Temporal entity graph** — transactions become nodes; shared cards, devices, IPs, and merchants become time-aware edges. Edges respect observation windows so the graph cannot see into the future.
 
-Individual transactions may appear legitimate when examined independently.
+**3. Candidate formation** — connected components of size ≥ 2 are extracted as candidates. No labels are consulted.
 
-The real signal emerges only when the activity is analyzed as a coordinated structure across entities and time.
+**4. Campaign scoring** — six decorrelated features are computed per candidate, mapped to percentiles against a frozen reference distribution, and averaged into a single score.
 
-3. CONFLUX in Action
-Coordinated Structure Detection
+**5. Risk threshold + action** — the score maps to a tier and a recommended action: **flag for review**, **stop group**, or **block**.
 
-CONFLUX visualizes relationships between transactions and the entities connected to them.
+**6. Evidence + explanation** — the response carries the linking entities, the contribution breakdown, and a human-readable explanation block.
 
-The system identifies candidate structures based on shared cards, devices, infrastructure, merchants, BIN relationships, and temporal activity.
+---
 
-The graph is not a decorative visualization. It represents the actual structural relationships used by the detection pipeline.
+## **The Deterministic Scorer**
 
-<img width="1021" height="662" alt="image" src="https://github.com/user-attachments/assets/7d9953e2-d56f-43da-97e5-dfb13b276fd4" />
+Six features, **equal weight (1/6 each)**, deliberately chosen to be low-correlation with one another:
 
+| Feature | What it captures |
+|---|---|
+| `burst_rate_per_minute` | Temporal compression — how tightly packed the transactions are |
+| `link_density` | How densely interconnected the candidate's entity graph is |
+| `max_transactions_per_shared_card` | Reuse intensity on the single hottest card |
+| `multi_entity_link_fraction` | Share of links backed by more than one entity type |
+| `distinct_merchants_per_transaction` | Merchant spread across the group |
+| `distinct_bins_per_transaction` | BIN diversity across the group |
 
-Candidate Ranking and Investigation
+Each raw value is converted to a **percentile against a frozen reference distribution** (`models/artifacts/scorer_reference_v1.json`), then averaged. Because the weights are uniform, each feature's contribution to the final score is `percentile × 1/6` — which makes the score fully reconstructible after the fact.
 
-Detected candidates are ranked using the backend campaign scorer.
+**Why deterministic first?** A transparent scorer that an analyst can audit line-by-line is the baseline any ML challenger has to beat on *grouped, out-of-fold* data. Not on the training set. Not on a random split.
 
-Each investigation exposes:
+---
 
-Campaign Risk Score
-Risk Tier
-Recommended Action
-Rank Among Candidates
-Top Contributing Signals
-Member Transactions
-Connected Evidence
-<img width="1917" height="1141" alt="image" src="https://github.com/user-attachments/assets/f0908777-81a3-42bc-b08e-42fa563d70d0" />
+## **Explainability Layer**
 
+`src/conflux/scoring/explain.py` inverts the weighting to recover the exact percentile behind every contribution, then turns it into a sentence.
 
-Interactive Entity Investigation
+For example, a contribution of `0.1613` on `burst_rate_per_minute` inverts to the **97th percentile** — and renders as:
 
-The graph allows suspicious structures to be explored visually.
+> *"These 7 transactions landed in an unusually tight time window — tighter than 97% of comparable groups."*
 
-Investigators can inspect how transactions connect through shared entities and identify relationships that would be difficult to see in a traditional transaction table.
-
-4. Dataset
-
-A synthetic transaction dataset was purpose-built for this project.
-
-It was not scraped or pulled from a real payment dataset. The goal was to create a safe dataset that still required genuine multi-signal reasoning to solve.
-
-The dataset was deliberately designed so that no single raw feature could trivially separate attacks from legitimate traffic.
-
-Frozen Version
-
-dataset_v4_final.csv
-
-Property	Value
-Total Transactions	31,873
-Attack Rate	6.40%
-Campaigns	45 across 6 attacker archetypes
-Legitimate Traffic	Includes deliberate hard-negative clusters
-Identifier Overlap	Deliberate overlap between legitimate and attack populations
-IP Signature	Independent field, not derived from other leak-prone features
-Dataset Design Philosophy
-
-The dataset design framework was locked before implementation.
-
-It covered:
-
-Campaign definition
-Available signals
-Legitimate vs attack differentiation
-Attacker variation across archetypes
-Feature layers
-Graph structure
-How ML and graph evidence combine
-Campaign scoring and explanation
-Time-aware evaluation
-What judges will see in the demo
-V3 → V4 Improvements
-
-The final dataset version addressed important design issues:
-
-Fixed non-seeded uuid4 generation to improve reproducibility.
-Fixed a card-reuse-count feature that was close to solving the task independently.
-Replaced a thresholded "stump" leakage test with an AUC-based leakage test.
-
-The purpose was not simply to make the dataset harder. It was to prevent artificial shortcuts and force the system to rely on meaningful combined evidence.
-
-5. Architecture
-High-Level Detection Pipeline
-                         ┌─────────────────────┐
-                         │  Transaction Stream │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │ Feature Engineering │
-                         │  Behavioral Signals │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │ Transaction-Level  │
-                         │     ML Baseline     │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-             ┌────────────────────────────────────────┐
-             │     Cross-Entity Temporal Graph        │
-             │                                        │
-             │ Card · BIN · Device · IP · Merchant   │
-             │                · Transaction           │
-             └───────────────────┬────────────────────┘
-                                 │
-                                 ▼
-                      ┌─────────────────────┐
-                      │ Candidate Discovery │
-                      │ Coordinated Groups  │
-                      └──────────┬──────────┘
-                                 │
-                                 ▼
-                      ┌─────────────────────┐
-                      │ Campaign Scoring    │
-                      │ Explainable Risk    │
-                      └──────────┬──────────┘
-                                 │
-                                 ▼
-                      ┌─────────────────────┐
-                      │ FastAPI + WebSocket │
-                      └──────────┬──────────┘
-                                 │
-                                 ▼
-                      ┌─────────────────────┐
-                      │ CONFLUX Frontend    │
-                      │ Detection + Review  │
-                      └─────────────────────┘
-6. Transaction-Level Intelligence — Phase 1–2
-
-CONFLUX first establishes transaction-level behavioral intelligence.
-
-Six feature groups were engineered against a locked feature specification, with strict causal-window rules to prevent future information from leaking into historical scoring.
-
-Feature Groups
-Amount Behavior
-Device Behavior
-BIN Behavior
-Merchant Pattern Behavior
-Velocity
-Decline Ratio
-
-The feature specification includes exact behavioral formulations such as:
+Design rules the layer follows:
 
-Coefficient of variation
-Normalized-entropy merchant dispersion
-Burst density
-Other time-aware behavioral signals
-ML Baseline
+- **No hard-coded arithmetic.** It consumes the scorer's own `percentile_info`, so if the weighting ever changes the explanation follows automatically.
+- **Percentile thresholds.** `STRONG_PERCENTILE = 0.90` marks a signal as genuinely unusual; `ORDINARY_PERCENTILE = 0.60` marks it as unremarkable. Anything below reads as "normal for this population."
+- **Honest verdicts.** If nothing crosses the strong threshold, the verdict says so rather than manufacturing alarm.
+- **Rank, not probability.** The panel states explicitly that "15th of 15" is a *ranking* position, not a 15/15 likelihood of fraud.
+- **All six signals, always.** `top_n_signals` is set to the full feature count so the panel never silently truncates the story.
 
-A Logistic Regression baseline was trained and evaluated using the project's transaction-level feature pipeline.
+---
 
-Relevant components include:
+## **Build Phases**
 
-train_baseline.py
-predict.py
+Every phase below was gated on its own checklist before the next one started.
 
-Evaluation included:
-
-Standard classification metrics
-Feature analysis
-Ablation work
-Leakage auditing
-Leakage Audit
-
-The ML pipeline passed all 7 planned leakage checks:
-
-Forbidden inputs
-Feature-target alignment
-Feature integrity
-Temporal integrity
-Preprocessing leakage
-Causality
-Suspicious / too-good-to-be-true signal strength
-
-The objective was not just model performance. The objective was ensuring that the model was learning from information realistically available at scoring time.
-
-Known Finding: BIN Dominance
-
-BIN-group features were found to be particularly strong.
-
-A static per-BIN historical fraud-rate signal across approximately 250 BINs reached around 0.90 AUC alone.
-
-This was explicitly identified as a potential generalization risk.
-
-It was not hidden or treated as an unquestioned success.
-
-The finding remains documented as an important limitation and consideration for future generalization beyond the synthetic environment.
-
-7. Cross-Entity Graph and Campaign Discovery — Phase 3
-
-The central idea behind CONFLUX is that suspicious activity should be understood as a structure of relationships.
-
-The graph is a heterogeneous temporal graph.
-
-Node Types
-Transaction
-Card
-BIN
-Device
-IP Signature
-Merchant
-
-A transaction connects to the entities involved in it.
-
-This allows the system to discover structures such as:
-
-         Card A ─────┐
-                     │
-Merchant 1 ── Transaction ── Device X
-                     │
-                 IP Signature
-                     │
-               Merchant 2
-                     │
-         Other Transactions
-
-A coordinated campaign may therefore become visible through entity reuse and structural overlap, even when individual transactions are not obviously suspicious.
-
-Causality Constraint
-
-The graph is evaluated using information available only up to the relevant transaction timestamp.
-
-No future transactions are allowed to provide evidence for historical detection.
-
-This is essential because fraud detection systems must operate under realistic observation constraints.
-
-Why an Explainable Graph Instead of a GNN?
-
-For the first version of CONFLUX, an explainable graph-based approach was chosen over a Graph Neural Network.
-
-The reasoning was practical:
-
-Interpretability is critical
-A reviewer needs to understand why a campaign was flagged
-Judges should be able to inspect the evidence
-The graph structure itself provides meaningful visual intelligence
-
-The system therefore prioritizes:
-
-Explainable structural evidence over black-box complexity.
-
-Campaign Evidence Rule
-
-A critical design rule was enforced:
-
-BIN concentration alone is never campaign evidence.
-
-A meaningful campaign requires cross-entity overlap combined with temporal structure.
-
-The system looks for combinations such as:
-
-Multiple Cards
-+ Multiple Merchants
-+ Shared Device or IP Infrastructure
-+ Temporal Burst
-
-8. Candidate Generation — Phase 3B and 3C
-
-Candidate generation produced:
-
-Metric	Result
-Multi-Transaction Candidates Generated	4,372
-Attack-Containing Candidates	81
-Non-Campaign / Noise Candidates	4,291
-Campaign Transaction Recall	99.27%
-Campaign Transactions Recovered	2,026 / 2,041
-Mixed / Contaminated Campaigns	0
-Pure Campaign Candidates	46
-Campaign + Normal Traffic Candidates	35
-
-The candidate-generation process was verified as leakage-clean.
-
-Important Design Decision
-
-Candidates were not hand-cleaned to artificially improve downstream results.
-
-Instead, diagnostic properties such as:
-
-Inter-arrival time
-BIN diversity
-Burst rate
-Link topology
-
-were used to inform the campaign-scoring design.
-
-The goal was to make the scorer robust to imperfect candidate generation rather than pretending the graph always produces perfectly isolated campaigns.
-
-9. Campaign Scoring — Phase 3D and Phase 4
-
-CONFLUX moves beyond transaction-level classification by scoring the candidate campaign itself.
-
-Phase 3D — ML Signal Integration
-
-Campaign-level scoring was integrated with transaction-level ML evidence.
-
-This allows campaign intelligence to incorporate both:
-
-Behavioral transaction signals
-Structural campaign signals
-Phase 4A — Deterministic Campaign Scorer
-
-A deterministic and explainable campaign scorer was built and validated.
-
-The scorer produces campaign-level outputs used by the backend and frontend, including:
-
-Risk score
-Risk tier
-Recommended action
-Signal contributions
-Campaign evidence
-
-The frontend therefore does not need to invent explanations.
-
-Every visible investigation signal is intended to trace back to actual backend/scorer output.
-Phase 4B — Robustness and Adversarial Testing
-
-The campaign scorer was tested against multiple difficult conditions.
-
-These included:
-
-Unseen campaigns
-Changed attack cadence
-Changed scale-up cadence
-Increased legitimate traffic
-Weaker entity reuse
-Temporal boundary cases
-Observation-window vs horizon edge cases
-Benign traffic bursts
-Dedicated false-positive stress tests
-Temporal train/test splitting
-
-This phase was intended to answer a more important question than:
-
-"Does the scorer work on the original data?"
-
-Instead:
-
-"Does the detection logic remain meaningful when attacker behavior and legitimate traffic conditions change?"
-
-Phase 4C
-
-The planned ML vs deterministic-scorer comparison was deliberately skipped to protect the project ship date.
-
-The decision was:
-
-Use the validated and adversarially tested deterministic campaign scorer as the production scorer.
-
-Phase 4C remains a possible future extension rather than a blocker for the working system.
-
-10. Backend
-
-The backend is implemented as a Python FastAPI service.
-
-It is decoupled from the frontend.
-
-The frontend communicates with the backend through:
-
-HTTP APIs
-WebSocket connections
-
-The backend is responsible for:
-
-Loading scoring artifacts
-Processing transaction activity
-Generating candidate structures
-Producing campaign scoring output
-Providing evidence for investigations
-Supporting real-time frontend updates
-Deployment
-
-The backend is deployed as a live web service.
-
-Production backend:
-
-CONFLUX API
-
-The deployment was verified through the health endpoint.
-
-The health response confirmed:
-
-status: ok
-scorer_loaded: true
-Scoring artifacts successfully loaded
-FastAPI application running successfully
-
-A 404 response on / is expected because the application does not define a root route. The deployed health endpoint is the correct verification route.
-
-11. Frontend and Live Investigation Experience
-
-The CONFLUX frontend is designed to make the detection system's reasoning visible.
-
-The focus is not simply displaying a risk number.
-
-The interface exposes:
-
-Risk Overview
-
-High-level system state, candidate counts, and campaign activity.
-
-Cross-Merchant Graph
-
-The central visualization shows relationships between:
-
-Merchants
-Cards
-Devices
-IP-related entities
-Transactions
-
-Suspicious structures can be visually investigated.
-
-Live Transaction Stream
-
-Transactions are streamed into the interface during the replay experience.
-
-Candidate Structures
-
-Detected candidate campaigns are ranked and presented for investigation.
-
-Investigation Panel
-
-Investigators can inspect:
-
-Risk score
-Risk tier
-Recommended action
-Campaign members
-Signal contributions
-Transaction evidence
-Graph Interaction
-
-Selecting entities and campaign structures helps isolate relevant relationships while reducing unrelated visual noise.
-
-12. Recommended Actions
-
-Campaigns are surfaced with an operational recommendation.
-
-REVIEW
-
-The structure requires human investigation.
-
-STEP-UP
-
-Additional verification or friction should be introduced.
-
-BLOCK
-
-The coordinated evidence is sufficiently strong to justify stronger intervention.
-
-The recommended action is based on campaign-level evidence rather than treating a single transaction as definitive proof.
-
-13. Frontend Integrity Rule
-
-A strict demo constraint was established:
-
-The frontend must not invent campaign evidence.
-
-Every meaningful signal displayed to the reviewer should originate from:
-
-Backend output
-Scorer output
-Actual transaction/candidate data
-
-The UI is therefore intended to function as an investigation interface, not a static dashboard containing fabricated explanations.
-
-14. Technology Stack
-Layer	Technology
-Backend	Python
-API Framework	FastAPI
-Real-Time Communication	WebSocket
-ML	Scikit-learn
-Data Processing	Pandas / NumPy
-Frontend	React
-Frontend Tooling	Vite
-Language	TypeScript
-Styling	Tailwind CSS
-Graph Visualization	Cytoscape.js
-Backend Deployment	Render
-15. Why Cytoscape.js?
-
-The centerpiece of CONFLUX is a genuine relationship network.
-
-The visual model contains entities and connections rather than a sequential workflow or DAG.
-
-For this reason, a graph-focused visualization library was chosen.
-
-Cytoscape.js fits the project because the core visual object is:
-
-A network of entities and relationships.
-
-This is fundamentally different from a standard flowchart.
-
-16. Repository Structure
-
-The repository is organized around the CONFLUX Python package, supporting project documentation, evaluation, testing, data, deployment configuration, and a separate frontend.
-
+### **Phase 3 — Graph & Candidate Foundations** ✅
+
+| Sub-phase | Scope | Status |
+|---|---|---|
+| **3A** | Temporal entity graph | ✅ 7/7 checks |
+| **3B** | Candidate formation | ✅ 13/13 checks |
+| **3C** | Candidate / campaign evaluation | ✅ |
+| **3D** | Campaign scoring + ML integration | ✅ |
+
+### **Phase 4A — Deterministic Campaign Scorer** ✅
+
+- ✅ Small decorrelated feature set
+- ✅ Transparent scoring
+- ✅ Campaign-aware validation
+- ✅ Temporal validation
+- ✅ Threshold / recall trade-off
+- ❌ **BIN / no-BIN ablation** — *outstanding*
+
+### **Phase 4B — Robustness & Adversarial Testing** ✅
+
+| Scenario | Perturbation applied |
+|---|---|
+| ✅ Unseen campaigns | Held-out campaign groups |
+| ✅ Changed attack cadence | Scaled group cadence, jittered timestamps |
+| ✅ More legitimate traffic | Benign volume injection |
+| ✅ Weaker entity reuse | Reduced shared-entity overlap |
+| ✅ Temporal boundary cases | Observation-window truncation, right-censoring |
+| ✅ False-positive stress test | Benign bursts engineered to mimic campaigns |
+
+### **Phase 4C — ML Comparison** ⬜ *not yet executed*
+
+The pre-registered plan, written **before** any model was fit:
+
+- Small **interpretable** model only — no deep model is warranted at n=45 campaigns
+- Compared against the deterministic scorer under **repeated, campaign-grouped CV** (5 repeats × 5 folds)
+- **Decision rule:** adopt the challenger only if mean PR-AUC gain **≥ 0.05** with a 95% CI excluding zero, *and* it beats a cheap-feature baseline
+- Keep whichever arm **genuinely generalises** — the deterministic scorer stays unless the challenger clears the bar
+
+Planned arms: `D` (deterministic), `X_core` (monotone-constrained XGBoost on the six core features), `X_free`, `X_cheap`, `X_noBIN`, `X_ext`, and `LR_agg` as a diagnostic-only arm.
+
+### **Phase 5 — Final Detection Pipeline** ✅
+
+- ✅ Candidate generation
+- ✅ Campaign scoring (scorer reference loaded, 5/5 rules)
+- ✅ Risk threshold
+- ✅ Explanation / evidence
+- ✅ Action: flag review / stop group / block
+
+### **Phase 6 — Backend & API Integration** ✅
+
+- ✅ Inference endpoint
+- ✅ Transaction ingestion — `POST /transactions` → validate → store in memory
+- ✅ Campaign state
+- ✅ Scoring response — once the buffer fills, convert stored transactions, run the detection pipeline, return JSON
+- ✅ Explanation payload
+
+### **Phase 7 — Frontend & Demo Dashboard** ✅
+
+- ✅ Transaction / campaign view
+- ✅ Graph visualisation
+- ✅ Risk score
+- ✅ Connected entities
+- ✅ Evidence
+- ❌ **Attack timeline** — *outstanding*
+
+### **Phase 8 — Final Evaluation & Demo Hardening** ⬜ *in progress*
+
+- ⬜ Full end-to-end run
+- ⬜ Latency measurement
+- ⬜ Failure handling
+- ⬜ Leakage audit
+- ⬜ Reproducibility check
+- ⬜ Demo dataset / scenarios
+
+---
+
+## **Architecture**
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  FRONTEND  (TypeScript + Vite, deployed on Vercel)           │
+│                                                              │
+│   main.ts ──> ui-controller.ts ──> graph.ts                  │
+│      │             │                                         │
+│      │             └──> explain-panel.ts  ("What this means")│
+│      │                                                       │
+│   data-loader.ts <── types.ts        api/rest-client.ts      │
+│                                      api/websocket-client.ts │
+└────────────────────────┬─────────────────────────────────────┘
+                         │  REST  +  WebSocket
+┌────────────────────────▼─────────────────────────────────────┐
+│  BACKEND  (FastAPI, deployed on Render)                      │
+│                                                              │
+│   api/main.py       routes, validation, exception handlers   │
+│   api/schemas.py    strict input contract (rejects labels)   │
+│   api/state.py      in-memory store  ─>  run_detection()     │
+│   api/websocket.py  live push to dashboard                   │
+└────────────────────────┬─────────────────────────────────────┘
+                         │
+┌────────────────────────▼─────────────────────────────────────┐
+│  DETECTION CORE                                              │
+│                                                              │
+│   pipeline.py                                                │
+│      ├─> graph/temporal_graph.py     entity graph            │
+│      ├─> graph/build_candidates.py   connected components    │
+│      ├─> scoring/candidate_features.py   six features        │
+│      ├─> scoring/deterministic_scorer.py percentile scoring  │
+│      ├─> scoring/campaign_risk.py    tier + action           │
+│      └─> scoring/explain.py          natural-language layer  │
+│                                                              │
+│   models/artifacts/scorer_reference_v1.json  frozen ref dist │
+└──────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## **Folder Structure**
+
+```
 conflux/
 │
 ├── data/
-│   └── raw/
-│       └── dataset_v4_final.csv
+│   ├── raw/
+│   │   ├── dataset_v4_final.csv
+│   │   └── dataset_v4_validation.json
+│   └── processed/
+│       ├── evaluation/
+│       │   └── phase3c_diagnostics/
+│       │       ├── boolean_comparison.csv
+│       │       ├── candidate_diagnostic_features.csv
+│       │       ├── numeric_comparison.csv
+│       │       ├── phase3c_diagnostic_report.json
+│       │       ├── sensitivity_campaign_majority.csv
+│       │       └── top_feature_redundancy_summary.csv
+│       ├── graph/
+│       │   ├── campaign_candidate_assignments.csv
+│       │   ├── campaign_candidate_links.csv
+│       │   ├── campaign_candidate_report.json
+│       │   └── campaign_candidates.csv
+│       ├── robustness/
+│       │   └── baseline_rebuild.txt
+│       ├── scoring/
+│       │   ├── artifacts/
+│       │   ├── candidate_scoring_features.csv
+│       │   ├── core_feature_spearman.csv
+│       │   ├── out_of_fold_scores.csv
+│       │   ├── phase4a_scoring_report.json
+│       │   └── recall_exchange_table.csv
+│       ├── ablation_report.json
+│       ├── baseline_metrics_report.json
+│       ├── feature_dictionary.csv
+│       ├── features_v4.csv
+│       ├── univariate_auc.csv
+│       └── validation_report.json
 │
 ├── frontend/
-│   └── Vite + TypeScript application
+│   ├── public/
+│   ├── dist/                          # build output (Vercel)
+│   ├── src/
+│   │   ├── api/
+│   │   │   ├── rest-client.ts
+│   │   │   └── websocket-client.ts
+│   │   ├── assets/
+│   │   ├── data/
+│   │   │   ├── data-loader.ts         # normalises API -> view models
+│   │   │   ├── replay-source.ts
+│   │   │   └── types.ts               # Campaign, CampaignExplanation, CandidateView
+│   │   ├── graph/
+│   │   │   ├── graph-builder.ts
+│   │   │   ├── graph-interactions.ts
+│   │   │   └── graph.ts
+│   │   ├── story/
+│   │   │   └── story-controller.ts
+│   │   ├── styles/
+│   │   │   ├── animations.css
+│   │   │   ├── explain.css            # cfx- prefixed, additive only
+│   │   │   ├── global.css
+│   │   │   └── graph.css
+│   │   ├── ui/
+│   │   │   ├── explain-panel.ts       # renders the explanation block
+│   │   │   └── ui-controller.ts
+│   │   └── main.ts
+│   ├── index.html
+│   └── package.json
 │
-├── src/
-│   └── conflux/
-│       │
-│       ├── api/
-│       │   ├── main.py
-│       │   ├── schemas.py
-│       │   ├── state.py
-│       │   └── websocket.py
-│       │
-│       ├── evaluation/
-│       ├── features/
-│       ├── graph/
-│       ├── models/
-│       │   └── artifacts/
-│       └── scoring/
+├── src/conflux/
+│   ├── api/
+│   │   ├── main.py                    # FastAPI app + routes
+│   │   ├── schemas.py                 # input contract
+│   │   ├── state.py                   # in-memory state + run_detection
+│   │   └── websocket.py
+│   ├── evaluation/
+│   │   ├── ablation.py
+│   │   ├── campaign_evaluation.py
+│   │   ├── candidate_diagnostics.py
+│   │   ├── leakage_audit.py
+│   │   ├── metrics.py
+│   │   ├── run_campaign_evaluation.py
+│   │   └── run_candidate_diagnostics.py
+│   ├── features/
+│   │   ├── amount_features.py
+│   │   ├── bin_features.py
+│   │   ├── build_feature_table.py
+│   │   ├── decline_features.py
+│   │   ├── device_features.py
+│   │   ├── merchant_features.py
+│   │   └── velocity_features.py
+│   ├── graph/
+│   │   ├── build_candidates.py
+│   │   ├── build_graph.py
+│   │   ├── campaign_detection.py
+│   │   ├── config.py
+│   │   ├── graph_metrics.py
+│   │   └── temporal_graph.py
+│   ├── ingestion/
+│   │   └── load_transactions.py
+│   ├── models/
+│   │   ├── artifacts/
+│   │   │   ├── baseline_logreg_v4_report.json
+│   │   │   ├── baseline_model.pkl
+│   │   │   ├── scorer_reference_v1.json
+│   │   │   └── scorer_reference_v1_meta.json
+│   │   ├── predict.py
+│   │   └── train_baseline.py
+│   ├── robustness/
+│   │   ├── perturbations.py
+│   │   ├── rebuild.py
+│   │   ├── scenario_cadence.py
+│   │   ├── scenario_entity_reuse.py
+│   │   ├── scenario_false_positive_stress.py
+│   │   ├── scenario_legit_volume.py
+│   │   ├── scenario_right_censoring.py
+│   │   └── world.py
+│   ├── scoring/
+│   │   ├── campaign_risk.py
+│   │   ├── candidate_features.py
+│   │   ├── config.py
+│   │   ├── deterministic_scorer.py    # six-feature percentile scorer
+│   │   ├── evaluation.py
+│   │   ├── explain.py                 # explainability layer
+│   │   ├── run_scoring_evaluation.py
+│   │   ├── scorer_reference_io.py
+│   │   └── splits.py                  # campaign-grouped / temporal splits
+│   ├── config.py
+│   └── pipeline.py                    # Phase 5 end-to-end pipeline
 │
 ├── tests/
-├── tools/
+│   ├── conftest.py
+│   ├── test_api.py
+│   ├── test_campaign_candidates.py
+│   ├── test_campaign_evaluation.py
+│   ├── test_deterministic_scorer.py
+│   ├── test_phase3b_integrity.py
+│   ├── test_phase4b_perturbations.py
+│   ├── test_phase4b_scenario_cadence.py
+│   ├── test_phase4b_scenario_entity_reuse.py
+│   ├── test_phase4b_scenario_false_positive.py
+│   ├── test_phase4b_scenario_legit_volume.py
+│   ├── test_phase4b_scenario_right_censoring.py
+│   ├── test_phase4b_world.py
+│   ├── test_phase5_pipeline.py
+│   ├── test_scorer_reference.py
+│   ├── test_scoring_features.py
+│   ├── test_scoring_leakage.py
+│   ├── test_scoring_splits.py
+│   └── test_scoring_thresholds.py
 │
+├── tools/
+│   ├── build_scorer_reference.py
+│   ├── phase4a_dev_feature_selection.py
+│   ├── phase4a_diagnostic.py
+│   ├── phase4a_diagnostic_v2.py
+│   └── phase4a_feature_cv.py
+│
+├── AI_WORKING_RULES.md
 ├── ARCHITECTURE.md
 ├── DECISIONS.md
 ├── FEATURE_SPEC.md
 ├── PROJECT_CONTEXT.md
-│
+├── README.md
+├── render.yaml
 ├── requirements.txt
-└── render.yml
-17. Model and Scoring Artifacts
+└── verification_output.txt
+```
 
-The backend loads trained and scoring artifacts from:
+---
 
-src/conflux/models/artifacts/
+## **Quickstart**
 
-Tracked artifacts include the scoring references and metadata required by the production campaign scorer.
+**Prerequisites:** Python 3.14+, Node 18+
 
-The deployed health check confirms:
+### **Backend**
 
-"scorer_loaded": true
+```bash
+git clone https://github.com/aryanpol73/conflux.git
+cd conflux
 
-This is important because the frontend is not simply displaying static campaign examples.
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# macOS / Linux
+source .venv/bin/activate
 
-The backend is responsible for generating actual scoring output used by the investigation experience.
+pip install -r requirements.txt
+```
 
-18. Evaluation and Validation
+The package is imported from `src/`, so set the path before running:
 
-The project development process included more than simply training a model and checking accuracy.
+```powershell
+# Windows PowerShell
+$env:PYTHONPATH = "$PWD\src"
+```
 
-Validation work included:
+```bash
+# macOS / Linux
+export PYTHONPATH="$PWD/src"
+```
 
-Feature leakage auditing
-Forbidden-input checks
-Temporal integrity checks
-Causal feature construction
-Candidate-generation diagnostics
-Campaign transaction recall
-Contamination checks
-Robustness testing
-Adversarial testing
-False-positive stress testing
-Temporal evaluation
+Then start the API:
 
-The overall philosophy was:
+```bash
+uvicorn conflux.api.main:app --reload --port 8000
+curl http://localhost:8000/health
+```
 
-Speed of implementation should not replace validation.
+Confirm the response shows `"scorer_loaded": true` — without the frozen reference distribution the scorer cannot produce percentiles.
 
-AI-assisted development was used to accelerate implementation, but major project decisions were structured around:
+### **Frontend**
 
-Locked specifications
-Explicit validation
-Leakage awareness
-Robustness testing
-Explainability
-19. Tooling Used During Development
-Purpose	Tooling Used
-Implementation / Feature Development	AI-assisted development workflows
-Evaluation and Analysis	AI-assisted review and analysis
-Review / Validation / Testing	Iterative AI-assisted validation
-Backend Development	Python ecosystem
-Frontend Development	React + TypeScript ecosystem
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-The development approach was intentionally fast and AI-assisted.
+---
 
-However:
+## **API Reference**
 
-AI assistance was used to accelerate implementation — not to eliminate specification, validation, leakage auditing, or robustness testing.
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/health` | Liveness, `scorer_loaded`, `transactions_in_memory` |
+| `GET` | `/campaigns` | Current campaign population with scores and explanations |
+| `POST` | `/transactions` | Ingest one transaction, return the **population** result |
+| `POST` | `/reset` | Clear in-memory state (demo control) |
+| `WS` | `/ws` | Live push of detection updates to the dashboard |
 
-20. Development Timeline
-Original deadline: August 28, 2026
-Buffer / stabilization period: August 30 – September 3, 2026
-Final submission target: September 4, 2026
+**Important contract detail:** `POST /transactions` returns the *whole population* — `{"status", "summary", "campaigns"}` — not a single row score. A campaign only exists relative to everything else in the buffer, so a per-row response would be meaningless.
 
-The project timeline prioritized:
+**Sample campaign payload:**
 
-Correctness
-Backend completion
-Deployment verification
-Frontend integration
-Demo quality and polish
-21. Status Summary
-Component	Status
-Dataset v4	✅ Frozen
-Transaction-Level ML Baseline	✅ Complete
-Leakage Audit	✅ Completed
-Cross-Entity Graph	✅ Complete
-Candidate Generation	✅ Complete
-Deterministic Campaign Scorer	✅ Built and Validated
-Robustness / Adversarial Testing	✅ Completed
-Backend API	✅ Complete
-WebSocket Integration	✅ Working
-Backend Deployment	✅ Live and Verified
-Frontend Investigation Experience	✅ Implemented
-Demo Polish / Final Submission Preparation	🔧 Final Stage
+```json
+{
+  "candidate_id": "CAND-000216",
+  "size": 7,
+  "score": 0.4127,
+  "tier": "elevated",
+  "action": "flag_review",
+  "evidence": {
+    "shared_cards": 2,
+    "shared_devices": 1,
+    "shared_ips": 0
+  },
+  "explanation": {
+    "headline": "7 transactions linked by shared payment entities",
+    "verdict": "One signal stands out clearly.",
+    "summary": "Grouped by 2 shared cards and 1 shared device.",
+    "all_signals": [
+      {
+        "feature": "burst_rate_per_minute",
+        "percentile": 0.97,
+        "is_strong": true,
+        "text": "Landed in an unusually tight time window — tighter than 97% of comparable groups."
+      },
+      {
+        "feature": "max_transactions_per_shared_card",
+        "percentile": 0.36,
+        "is_strong": false,
+        "text": "Card reuse is unremarkable for a group this size."
+      },
+      {
+        "feature": "distinct_bins_per_transaction",
+        "percentile": 0.02,
+        "is_strong": false,
+        "text": "BIN diversity is very low compared with similar groups."
+      }
+    ],
+    "truncated": false,
+    "rank_text": "Ranked 15th of 15 current candidates.",
+    "method": "Six equal-weight percentile features.",
+    "caveat": "This is a ranking position, not a probability of fraud."
+  }
+}
+```
 
-22. Key Design Principles
-1. A Transaction Is Not Proof
+---
 
-A pattern across entities and time is stronger evidence than an isolated transaction.
+## **Testing**
 
-2. No Single Signal Is Sufficient
+```bash
+# API contract, route registration, label rejection
+pytest tests/test_api.py -q
 
-A risky BIN, shared device, or transaction burst should not independently define a coordinated campaign.
+# Scorer, reference distribution, thresholds
+pytest tests/test_deterministic_scorer.py tests/test_scorer_reference.py tests/test_scoring_thresholds.py -q
 
-3. Structure Matters
+# Leakage and split integrity
+pytest tests/test_scoring_leakage.py tests/test_scoring_splits.py tests/test_phase3b_integrity.py -q
 
-Fraud campaigns can be detected through the relationships between:
+# Phase 4B robustness suite
+pytest tests/test_phase4b_*.py -q
 
-Cards · Devices · IP Infrastructure · BINs · Merchants · Transactions · Time
+# Everything
+pytest -q
+```
 
-4. Causality Matters
+Current status on all the `tests/`: **426 passed, 3 skipped**.
 
-The system should not rely on information that would only become available in the future.
+Two tests worth calling out because they encode design commitments rather than behaviour:
 
-5. Explainability Matters
+- `test_ground_truth_rejected_over_rest` — posting `label` or `campaign_id` must return **422**. This is the anti-leakage guardrail at the API boundary.
+- `test_rest_ingest_returns_population_result_not_a_row_score` — pins the response shape to exactly `{status, summary, campaigns}`.
 
-A risk manager must understand:
+---
 
-Why a candidate was flagged
-Which signals contributed
-Which transactions belong to the structure
-What action is recommended
-6. The UI Must Reflect Real Evidence
+## **Deployment**
 
-No invented campaign explanations. No fake risk signals for visual effect.
+**Backend — Render** (`render.yaml`)
 
-The investigation interface should expose real backend and scorer output.
+```bash
+uvicorn conflux.api.main:app --host 0.0.0.0 --port $PORT
+```
 
-23. The Core Idea
-A suspicious transaction
-        │
-        ▼
-may look harmless alone
-        │
-        ▼
-but becomes meaningful when connected to
-        │
-        ├── other cards
-        ├── other merchants
-        ├── shared devices
-        ├── shared infrastructure
-        └── a coordinated time pattern
-        │
-        ▼
-COORDINATED STRUCTURE
-        │
-        ▼
-CAMPAIGN INTELLIGENCE
-CONFLUX
-Cross-Merchant Campaign Intelligence
+**Frontend — Vercel**
 
-Detect the structure. Understand the evidence. Act on the campaign.
+```bash
+npm run build   # output: frontend/dist
+```
+
+**Deploy order matters.** The dashboard reads the `explanation` block from the API. Ship the backend first, wait for Render to go live, then push the frontend. Verify before promoting:
+
+```bash
+curl -s https://YOUR-RENDER-URL/campaigns \
+  | python -c "import sys,json; d=json.load(sys.stdin); c=d.get('campaigns') or []; print('campaigns:', len(c)); print(json.dumps(c[0].get('explanation'), indent=2) if c else 'none')"
+```
+
+The frontend degrades gracefully if `explanation` is absent — the panel simply doesn't render — so a stale backend won't break the graph.
+
+---
+
+## **Honest Limitations**
+
+These are stated up front because the alternative is someone discovering them in a demo.
+
+- **The score is a rank, not a probability.** A 0.41 does not mean 41% likely fraud. It means this candidate sits at a particular position in the reference distribution.
+- **Effective sample size is 45 campaigns, not 4,372 rows.** Positives cluster inside campaigns, so campaign-grouped CV is the only honest evaluation. Any row-level split would leak.
+- **Full re-scoring on every ingest.** The population is recomputed from scratch per transaction. Correct, but O(n) per call — fine for a demo, not for production throughput.
+- **State is process-local and in-memory.** A restart clears everything; there is no persistence layer yet.
+- **Phase 4C has not been run.** The XGBoost comparison is pre-registered but unexecuted. No claim is made that ML beats the deterministic scorer, because that has not been tested.
+- **BIN / no-BIN ablation is outstanding**, so the contribution of BIN-derived features to the score is not yet isolated.
+- **Zero-weight features are omitted from explanations** by design — the layer only narrates features that actually moved the score.
+- **Attack timeline view is not built**, so temporal sequencing inside a campaign is currently only visible as a burst-rate percentile.
+
+---
+
+## **Roadmap**
+
+- Execute **Phase 4C** and publish the full leaderboard, learning curves, and CI intervals — including the negative result if the deterministic scorer wins
+- Complete the **BIN / no-BIN ablation** to close out Phase 4A
+- Build the **attack timeline** panel to close out Phase 7
+- Finish **Phase 8**: end-to-end run, latency measurement, failure handling, leakage audit, reproducibility check, demo scenarios
+- Persistence layer so state survives restarts
+- Analyst feedback capture — record which flagged campaigns were confirmed, and feed that back into threshold tuning
+- Optional TreeSHAP comparison against the deterministic explanation, as a sanity check on the percentile inversion
+
+---
+
+## **Topics**
+
+`#fraud-detection` `#graph-analytics` `#entity-resolution` `#anomaly-detection`
+`#explainable-ai` `#xai` `#interpretable-machine-learning` `#fastapi` `#python`
+`#typescript` `#vite` `#data-visualization` `#websockets` `#rest-api`
+`#payment-fraud` `#card-fraud` `#fraud-analytics` `#machine-learning`
+`#xgboost` `#percentile-scoring` `#temporal-graph` `#campaign-detection`
+`#adversarial-testing` `#data-leakage` `#cross-validation` `#fintech`
+`#risk-scoring` `#real-time-analytics` `#dashboard` `#vercel` `#render`
+
+<div align="center">
+
+**Built with a bias toward transparency over accuracy claims.**
+
+</div>
