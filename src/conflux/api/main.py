@@ -111,17 +111,6 @@ def create_app() -> FastAPI:
         status_code=status.HTTP_200_OK,
         tags=["detection"],
     )
-
-    @application.post("/reset", tags=["ops"])
-    def reset_demo_state() -> dict[str, Any]:
-        state = get_state()
-        state.clear_transactions()
-
-        return {
-            "status": "ok",
-            "transactions_in_memory": state.transaction_count,
-        }
-    
     async def ingest_transaction(transaction: TransactionIn) -> dict[str, Any]:
         """Fallback ingest. WebSocket /ws is the primary live path.
 
@@ -136,6 +125,15 @@ def create_app() -> FastAPI:
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
             ) from exc
         return await run_in_threadpool(run_detection, state)
+
+    @application.post("/reset", tags=["ops"])
+    def reset_demo_state() -> dict[str, Any]:
+        state = get_state()
+        state.clear_transactions()
+        return {
+            "status": "ok",
+            "transactions_in_memory": state.transaction_count,
+        }
 
     return application
 

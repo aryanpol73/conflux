@@ -263,6 +263,14 @@ def run_detection(state: ApiState | None = None, **overrides: Any) -> dict[str, 
     kwargs: dict[str, Any] = dict(state.pipeline_kwargs)
     kwargs.update(overrides)
 
+    # The pipeline truncates evidence to top_n_signals=5 by default, which hides
+    # one of the six scored features. Default to "all of them" instead, while
+    # letting an explicit caller override still win. getattr-guarded so a test
+    # double standing in for ScorerReference does not break detection.
+    feature_names = getattr(reference, "feature_names", None)
+    if feature_names:
+        kwargs.setdefault("top_n_signals", len(feature_names))
+
     try:
         result = run_detection_pipeline(frame, scorer_reference=reference, **kwargs)
     except Exception as exc:  # noqa: BLE001 - wrapped, never swallowed
@@ -275,4 +283,11 @@ def run_detection(state: ApiState | None = None, **overrides: Any) -> dict[str, 
         raise DetectionError(
             f"detection pipeline returned {type(result).__name__}, expected a dict"
         )
+
+    # Imported here rather than at module scope: explain.py is a display helper
+    # and should not participate in the api -> scoring import graph at startup.
+    from conflux.scoring.explain import enrich_result
+
+    enrich_result(reference, result)
     return result
+
