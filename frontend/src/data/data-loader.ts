@@ -29,6 +29,7 @@ import {
   isServerEnvelope,
   toRiskBand,
   type Campaign,
+  type CampaignExplanation,
   type CandidateView,
   type ClientMessage,
   type ConnectionAckPayload,
@@ -187,6 +188,10 @@ export function normalizeDetection(
       topSignals: normalizeSignals(campaign.evidence),
       rank: index + 1,
       totalScoredInRun,
+      // Passed through verbatim. Absent on backends without the explain layer.
+      explanation: isRecordObject(campaign.explanation)
+        ? (campaign.explanation as CampaignExplanation)
+        : null,
       raw: campaign,
     };
   });

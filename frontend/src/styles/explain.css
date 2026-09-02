@@ -1,0 +1,71 @@
+/* Explainability block. All selectors are cfx-prefixed and additive:
+   nothing here overrides an existing rule. */
+
+.cfx-summary {
+  margin: 0 0 0.5rem;
+  font-size: 0.82rem;
+  opacity: 0.75;
+  line-height: 1.4;
+}
+
+.cfx-verdict {
+  margin: 0 0 0.7rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.cfx-list {
+  list-style: none;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cfx-row {
+  display: grid;
+  grid-template-columns: 3rem 4rem 1fr;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  opacity: 0.7;
+}
+
+.cfx-row.cfx-strong {
+  opacity: 1;
+  font-weight: 600;
+}
+
+.cfx-pct {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.cfx-bar {
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(127, 127, 127, 0.25);
+  overflow: hidden;
+}
+
+.cfx-bar > i {
+  display: block;
+  height: 100%;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.cfx-row.cfx-strong .cfx-bar > i {
+  opacity: 1;
+}
+
+.cfx-caveat {
+  margin: 0.35rem 0 0;
+  font-size: 0.74rem;
+  font-style: italic;
+  opacity: 0.6;
+}

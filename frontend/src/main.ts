@@ -15,6 +15,7 @@ import { buildGraph, countDerivedLinks } from './graph/graph-builder';
 import { GraphInteractions } from './graph/graph-interactions';
 import { StoryController } from './story/story-controller';
 import { UIController } from './ui/ui-controller';
+import { renderExplanation } from './ui/explain-panel';
 
 /* -- application state (view-level only) ----------------------------- */
 
@@ -80,6 +81,7 @@ const loader = new DataLoader(
       // Keep the open investigation panel in sync as candidates evolve.
       if (selectedKey) {
         ui.renderCandidateDetail(ui.findCandidate(selectedKey), (id) => story.findSent(id));
+        renderExplanation(ui.findCandidate(selectedKey));
       }
     },
 
@@ -151,6 +153,7 @@ function selectCandidate(key: string | null): void {
 
   if (key === null) {
     ui.renderCandidateDetail(null, (id) => story.findSent(id));
+    renderExplanation(null);
     graph.highlightCandidate(null);
     if (mode === 'investigation') redrawGraph();
     return;
@@ -158,6 +161,7 @@ function selectCandidate(key: string | null): void {
 
   const candidate = ui.findCandidate(key);
   ui.renderCandidateDetail(candidate, (id) => story.findSent(id));
+  renderExplanation(candidate);
   story.noteInvestigation();
   if (candidate && candidate.score !== null) story.noteScoreView();
 
@@ -178,6 +182,7 @@ async function handleReset(): Promise<void> {
   ui.clearActivity();
   ui.setSelectedCandidate(null);
   ui.renderCandidateDetail(null, (id) => story.findSent(id));
+  renderExplanation(null);
   ui.setGraphEmpty(true);
   ui.setBeat('idle');
   refreshStats();

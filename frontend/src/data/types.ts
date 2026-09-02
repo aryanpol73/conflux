@@ -65,8 +65,39 @@ export interface TopSignal {
   [extra: string]: unknown;
 }
 
+/** One decoded signal from the backend explainability layer (explain.py). */
+export interface ExplanationSignal {
+  feature: string;
+  label?: string;
+  /** 0..1, always "higher means more unusual" (sign already applied). */
+  suspicion_percentile?: number | null;
+  percentile_display?: string;
+  contribution?: number | null;
+  sign?: number;
+  sentence?: string;
+  is_strong?: boolean;
+  [extra: string]: unknown;
+}
+
+/** `campaigns[].explanation`. Absent on backends older than the explain layer. */
+export interface CampaignExplanation {
+  summary?: string;
+  headline?: string;
+  verdict?: string;
+  strong_signals?: ExplanationSignal[];
+  ordinary_signals?: ExplanationSignal[];
+  all_signals?: ExplanationSignal[];
+  signals_shown?: number;
+  signals_total?: number;
+  truncated?: boolean;
+  method?: string;
+  caveat?: string;
+  [extra: string]: unknown;
+}
+
 export interface CampaignEvidence {
   top_signals?: TopSignal[];
+  explanation?: CampaignExplanation;
   [extra: string]: unknown;
 }
 
@@ -78,6 +109,7 @@ export interface Campaign {
   tier?: string | null;
   action?: string | null;
   evidence?: CampaignEvidence;
+  explanation?: CampaignExplanation;
   [extra: string]: unknown;
 }
 
@@ -195,6 +227,7 @@ export interface CandidateView {
   band: RiskBand;
   action: string;
   topSignals: TopSignal[];
+  explanation: CampaignExplanation | null;
   /** 1-based rank by score within THIS run. Not a population percentile. */
   rank: number;
   /** Scored candidates in this run — the denominator for `rank`. */
