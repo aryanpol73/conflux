@@ -598,7 +598,7 @@ These are stated up front because the alternative is someone discovering them in
 `#explainable-ai` `#xai` `#interpretable-machine-learning` `#fastapi` `#python`
 `#typescript` `#vite` `#data-visualization` `#websockets` `#rest-api`
 `#payment-fraud` `#card-fraud` `#fraud-analytics` `#machine-learning`
-`#xgboost` `#percentile-scoring` `#temporal-graph` `#campaign-detection`
+`#percentile-scoring` `#temporal-graph` `#campaign-detection`
 `#adversarial-testing` `#data-leakage` `#cross-validation` `#fintech`
 `#risk-scoring` `#real-time-analytics` `#dashboard` `#vercel` `#render`
 
